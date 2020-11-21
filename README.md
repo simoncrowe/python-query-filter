@@ -9,7 +9,7 @@ This tool adds several features to Python's built-in `filter` function.
 ## Basic keyword filter
 
 If you're lucky enough to be working with collections of flat dictionaries
-and only need exactly, matches, you can simply use keyword arguments.
+and only need exact matches, you can simply use keyword arguments.
 
 ```python
 >>> from query_filter import query_filter
