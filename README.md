@@ -29,12 +29,15 @@ and only need exact matches, you can simply use keyword arguments.
             "gender": "Male"
         }
     ]
->>> list(query_filter(data, gender="Male")) 
-[{'id': 2,
-  'first_name': 'Mattie',
-  'last_name': 'Mazzilli',
-  'email': 'mmazzilli1@elpais.com',
-  'gender': 'Male'}]
+>>> data_filter = query_filter(data, gender="Female")
+>>> data_filter
+ <filter at 0x7f06f2b2bc50>
+>>> list(data_filter) 
+[{'id': 1,
+  'first_name': 'Allsun',
+  'last_name': 'Shergill',
+  'email': 'ashergill0@icq.com',
+  'gender': 'Female'}]
 ```
 
 ## Filter predicates
