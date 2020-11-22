@@ -1,6 +1,6 @@
 import pytest
 
-from query_filter.filter import query_filter
+from query_filter.filter import item_filter
 
 
 @pytest.fixture
@@ -63,14 +63,14 @@ def users(user_one, user_two, user_three, user_four, user_five):
 
 
 def test_filter_does_not_return_imput_object_references(users):
-    for in_user, out_user in zip(users, query_filter(users)):
+    for in_user, out_user in zip(users, item_filter(users)):
         assert in_user is not out_user
 
 
 def test_filter_keyword_arg(users, user_one, user_four):
     expected = (user_one, user_four)
 
-    results = tuple(query_filter(users, gender="Female"))
+    results = tuple(item_filter(users, gender="Female"))
 
     assert results == expected
 
@@ -79,7 +79,7 @@ def test_filter_keyword_args(users, user_four):
     expected = (user_four,)
 
     results = tuple(
-        query_filter(users, gender="Female", last_name="Philipeaux")
+        item_filter(users, gender="Female", last_name="Philipeaux")
     )
 
     assert results == expected
@@ -89,7 +89,7 @@ def test_filter_keyword_args_empty_results(users):
     expected = tuple() 
 
     results = tuple(
-        query_filter(users,
+        item_filter(users,
                      gender="Female",
                      last_name="Philipeaux",
                      email="gcristou4@si.edu")
@@ -104,7 +104,7 @@ def test_predicate_arg(users, user_two, user_four):
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(query_filter(users, id_is_even))
+    results = tuple(item_filter(users, id_is_even))
 
     assert results == expected
 
@@ -118,7 +118,7 @@ def test_predicate_args(users, user_one):
     def email_is_dot_com(item):
         return item["email"].endswith(".com")
 
-    results = tuple(query_filter(users, id_is_odd, email_is_dot_com))
+    results = tuple(item_filter(users, id_is_odd, email_is_dot_com))
 
     assert results == expected
 
@@ -129,6 +129,6 @@ def test_predicate_arg_with_keyword_arg(users, user_two):
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(query_filter(users, id_is_even, gender="Male"))
+    results = tuple(item_filter(users, id_is_even, gender="Male"))
 
     assert results == expected

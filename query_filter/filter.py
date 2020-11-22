@@ -15,7 +15,7 @@ def _simple_keywords_predicate(filter_kwargs: dict):
     return predicate
 
 
-def query_filter(items: Iterable, *predicates, **kwargs):
+def item_filter(items: Iterable, *predicates, **kwargs):
     items_copy = deepcopy(items)
     
     kwargs_predicate = _simple_keywords_predicate(kwargs)

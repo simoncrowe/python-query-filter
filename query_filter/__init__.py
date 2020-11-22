@@ -1,1 +1,1 @@
-from query_filter.filter import query_filter
+from query_filter.filter import item_filter 
