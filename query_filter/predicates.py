@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from functools import reduce
+from operator import getitem
 from typing import Any, Hashable, Iterable, Mapping
-
 
 
 def retrieve_attr(obj: Any, names: Iterable[str]):
@@ -12,7 +12,10 @@ def retrieve_attr(obj: Any, names: Iterable[str]):
 
 
 def retrieve_item(obj: Mapping, keys: Iterable[Any]):
-    pass
+    try:
+        return reduce(getitem, keys, obj)
+    except KeyError:
+        return None
 
 
 class Predicate(ABC):
@@ -35,5 +38,4 @@ class Predicate(ABC):
     @abstractmethod
     def evaluate(obj: Any, criteria: Any) -> bool:
         pass
-
 
