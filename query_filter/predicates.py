@@ -36,7 +36,7 @@ class Predicate(ABC):
     def __call__(self, obj: Any) -> bool:
         evaluated_obj = self._retrieve_func(obj, self._keys)
 
-        if evaluated_obj is not None:
+        if evaluated_obj is None:
             return False
 
         return self.evaluate(evaluated_obj, self._criteria)
