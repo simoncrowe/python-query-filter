@@ -1,8 +1,6 @@
 import pytest
 
-from query_filter.filter import item_filter
-from query_filter.path import Path
-
+from query_filter.filter import Item, qfilter
 
 @pytest.fixture
 def address_one():
@@ -64,7 +62,7 @@ def addresses(address_one, address_two, address_three, address_four, address_fiv
 def test_equality(addresses, address_two, address_three, address_four):
     expected = [address_two, address_three, address_four]
 
-    actual = list(item_filter(addresses, Path("state") == "California"))
+    actual = list(qfilter(addresses, Item("state") == "California"))
 
     assert actual == expected
 

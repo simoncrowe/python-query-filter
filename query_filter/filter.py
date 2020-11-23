@@ -1,6 +1,8 @@
 from copy import deepcopy
 from typing import Iterable
 
+from query_filter import predicates
+
 
 def _simple_keywords_predicate(filter_kwargs: dict):
 
@@ -15,7 +17,7 @@ def _simple_keywords_predicate(filter_kwargs: dict):
     return predicate
 
 
-def item_filter(items: Iterable, *predicates, **kwargs):
+def qfilter(items: Iterable, *predicates, **kwargs):
     items_copy = deepcopy(items)
     
     kwargs_predicate = _simple_keywords_predicate(kwargs)
@@ -24,6 +26,23 @@ def item_filter(items: Iterable, *predicates, **kwargs):
         if not kwargs_predicate(item):
             return False
 
-        return all(predicate(item, attrs=False) for predicate in predicates)
+        return all(predicate(item) for predicate in predicates)
     
     return filter(main_predicate, items_copy)
+
+
+class Attr:
+    def __init__(self, *names):
+        self._names = names
+
+    def __eq__(self, other):
+        return predicates.Equals(self._names, other, use_attrs=True)
+
+
+class Item:
+    def __init__(self, *keys):
+        self._keys = keys
+
+    def __eq__(self, other):
+        return predicates.Equals(self._keys, other, use_attrs=False)
+

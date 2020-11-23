@@ -11,7 +11,7 @@ def retrieve_attr(obj: Any, names: Iterable[str]):
         return None
 
 
-def retrieve_item(obj: Mapping, keys: Iterable[Any]):
+def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
     try:
         return reduce(getitem, keys, obj)
     except KeyError:
@@ -20,17 +20,23 @@ def retrieve_item(obj: Mapping, keys: Iterable[Any]):
 
 class Predicate(ABC):
 
-    def __init__(self, keys: Iterable[Hashable], criteria: Any):
+    def __init__(self,
+                 keys: Iterable[Hashable],
+                 criteria: Any,
+                 use_attrs: bool):
+
         self._keys = keys
         self._criteria = criteria
 
-    def __call__(self, obj: Any, attrs: bool) -> bool:
-        if attrs:
-            evaluated_obj = retrieve_attr(obj, self._keys)
+        if use_attrs:
+            self._retrieve_func = retrieve_attr
         else:
-            evaluated_obj = retrieve_item(obj, self._keys)
+            self._retrieve_func = retrieve_item
 
-        if not evaluated_obj:
+    def __call__(self, obj: Any) -> bool:
+        evaluated_obj = self._retrieve_func(obj, self._keys)
+
+        if evaluated_obj is not None:
             return False
 
         return self.evaluate(evaluated_obj, self._criteria)
