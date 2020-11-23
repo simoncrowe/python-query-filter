@@ -24,6 +24,6 @@ def item_filter(items: Iterable, *predicates, **kwargs):
         if not kwargs_predicate(item):
             return False
 
-        return all(predicate(item) for predicate in predicates)
+        return all(predicate(item, attrs=False) for predicate in predicates)
     
     return filter(main_predicate, items_copy)

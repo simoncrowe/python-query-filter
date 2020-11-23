@@ -61,7 +61,7 @@ def addresses(address_one, address_two, address_three, address_four, address_fiv
     ]
 
 
-def test_quality(addresses, address_two, address_three, address_four):
+def test_equality(addresses, address_two, address_three, address_four):
     expected = [address_two, address_three, address_four]
 
     actual = list(item_filter(addresses, Path("state") == "California"))

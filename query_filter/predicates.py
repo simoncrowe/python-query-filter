@@ -20,11 +20,11 @@ def retrieve_item(obj: Mapping, keys: Iterable[Any]):
 
 class Predicate(ABC):
 
-    def __init__(keys: Iterable[Hashable], criteria: Any):
+    def __init__(self, keys: Iterable[Hashable], criteria: Any):
         self._keys = keys
         self._criteria = criteria
 
-    def __call__(obj: Any, attrs: bool) -> bool:
+    def __call__(self, obj: Any, attrs: bool) -> bool:
         if attrs:
             evaluated_obj = retrieve_attr(obj, self._keys)
         else:
@@ -33,9 +33,15 @@ class Predicate(ABC):
         if not evaluated_obj:
             return False
 
-        return evaluate(evaluated_obj)
+        return self.evaluate(evaluated_obj, self._criteria)
 
     @abstractmethod
     def evaluate(obj: Any, criteria: Any) -> bool:
         pass
+
+
+class Equals(Predicate):
+
+    def evaluate(self, obj: Any, criteria: Any):
+        return obj == criteria
 
