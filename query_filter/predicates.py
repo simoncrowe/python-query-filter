@@ -71,3 +71,14 @@ class GreaterThanOrEqual(Predicate):
         return obj >= criteria
 
 
+class IsIn(Predicate):
+
+    def evaluate(selt, obj: Any, criteria: Any):
+        return obj in criteria
+
+
+class Contains(Predicate):
+
+    def evaluate(selt, obj: Any, criteria: Any):
+        return criteria in obj
+

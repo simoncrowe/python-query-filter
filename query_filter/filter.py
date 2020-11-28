@@ -37,29 +37,31 @@ class Query:
         self._getter
 
     def __lt__(self, other):
-        return predicates.LessThan(self._keys, other, getter=self._getter)
+        return predicates.LessThan(self._keys, other, self._getter)
 
     def __le__(self, other):
-        return predicates.LessThanOrEqual(self._keys,
-                                          other,
-                                          getter=self._getter)
+        return predicates.LessThanOrEqual(self._keys, other, self._getter)
 
     def __eq__(self, other):
-        return predicates.Equal(self._keys, other, getter=self._getter)
+        return predicates.Equal(self._keys, other, self._getter)
 
     def __ne__(self, other):
-        return predicates.NotEqual(self._keys, other, getter=self._getter)
+        return predicates.NotEqual(self._keys, other, self._getter)
 
     def __gt__(self, other):
-        return predicates.GreaterThan(self._keys, other, getter=self._getter)
+        return predicates.GreaterThan(self._keys, other, self._getter)
 
     def __ge__(self, other):
-        return predicates.GreaterThanOrEqual(self._keys,
-                                             other,
-                                             getter=self._getter)
+        return predicates.GreaterThanOrEqual(self._keys, other, self._getter)
+
+    def is_in(self, other):
+        return predicates.IsIn(self._keys, other, self._getter)
+
+    def contains(self, other):
+        return predicates.Contains(self._keys, other, self._getter)
 
 
-def retrieve_attr(obj: Any, *names :str):
+def retrieve_attr(obj: Any, *names: str):
     try:
         return reduce(getattr, names, obj)
     except AttributeError:
