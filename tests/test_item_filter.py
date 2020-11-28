@@ -2,6 +2,7 @@ import pytest
 
 from query_filter.filter import Item, qfilter
 
+
 @pytest.fixture
 def address_one():
     return {

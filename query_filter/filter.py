@@ -1,5 +1,7 @@
 from copy import deepcopy
-from typing import Iterable
+from functools import reduce
+from operator import getitem
+from typing import Any, Hashable, Iterable, Mapping
 
 from query_filter import predicates
 
@@ -31,12 +33,26 @@ def qfilter(items: Iterable, *predicates, **kwargs):
     return filter(main_predicate, items_copy)
 
 
+def retrieve_attr(obj: Any, names: Iterable[str]):
+    try:
+        return reduce(getattr, names, obj)
+    except AttributeError:
+        return None
+
+
 class Attr:
     def __init__(self, *names):
         self._names = names
 
     def __eq__(self, other):
-        return predicates.Equals(self._names, other, use_attrs=True)
+        return predicates.Equals(self._names, other, getter=retrieve_attr)
+
+
+def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
+    try:
+        return reduce(getitem, keys, obj)
+    except KeyError:
+        return None
 
 
 class Item:
@@ -44,5 +60,5 @@ class Item:
         self._keys = keys
 
     def __eq__(self, other):
-        return predicates.Equals(self._keys, other, use_attrs=False)
+        return predicates.Equals(self._keys, other, getter=retrieve_item)
 

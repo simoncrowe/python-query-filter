@@ -1,6 +1,6 @@
 import pytest
 
-from query_filter.predicates import retrieve_attr, retrieve_item
+from query_filter.filter import retrieve_attr, retrieve_item
 
 
 class Node:
