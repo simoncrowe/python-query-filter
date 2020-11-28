@@ -82,3 +82,15 @@ class Contains(Predicate):
     def evaluate(selt, obj: Any, criteria: Any):
         return criteria in obj
 
+
+class Is(Predicate):
+
+    def evaluate(selt, obj: Any, criteria: Any):
+        return obj is criteria
+
+
+class IsNot(Predicate):
+
+    def evaluate(selt, obj: Any, criteria: Any):
+        return obj is not criteria
+

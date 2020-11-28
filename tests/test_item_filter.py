@@ -130,12 +130,12 @@ def test_is_in_string(addresses, address_one, address_two):
     assert actual == expected
 
 
-def test_list_contains(addresses, address_one, address_two):
+def test_list_contains():
     primes =  {"type": "prime", "numbers": [2, 3, 5, 7, 11]}
     odd = {"type": "odd", "numbers": [1, 3, 5, 7, 9]}
     even = {"type": "even", "numbers": [0, 2, 4, 6, 8]}
-
     sequences = [primes, odd, even]
+
     expected = [primes, even]
 
     actual = list(qfilter(sequences, Item("numbers").contains(2)))
@@ -144,14 +144,50 @@ def test_list_contains(addresses, address_one, address_two):
 
 
 
-def test_string_contains(addresses, address_one, address_five):
+def test_string_contains():
     torpid_dic = {"type": "adjective", "word": "torpid"}
     turbid_dic = {"type": "adjective", "word": "turbid"}
     turgid_dic = {"type": "adjective", "word": "turgid"}
     words = [torpid_dic, turbid_dic, turgid_dic]
+
     expected = [turbid_dic, turgid_dic]
 
     actual = list(qfilter(words, Item("word").contains("u")))
 
     assert actual == expected
+
+
+def test_is():
+    class Thing:
+        pass
+
+    thing_one, thing_two = Thing(), Thing()
+    thing_one_data = {"id": 0, "thing": thing_one}
+    thing_two_data = {"id": 1, "thing": thing_two}
+    things_data = [thing_one_data, thing_two_data]
+
+    expected = [thing_two_data]
+
+    actual = list(qfilter(things_data, Item("thing")._is(thing_two)))
+
+    assert len(actual) == 1
+    assert actual[0]["id"] == thing_two_data["id"]
+
+
+def test_is_not():
+    class Thing:
+        pass
+
+    thing_one, thing_two = Thing(), Thing()
+    thing_one_data = {"id": 0, "thing": thing_one}
+    thing_two_data = {"id": 1, "thing": thing_two}
+    things_data = [thing_one_data, thing_two_data]
+
+    expected = [thing_two_data]
+
+    actual = list(qfilter(things_data, Item("thing")._is_not(thing_two)))
+
+    assert len(actual) == 1
+    assert actual[0]["id"] == thing_one_data["id"]
+
 

@@ -27,7 +27,7 @@ def qfilter(items: Iterable, *predicates, **kwargs) -> Iterable[Any]:
             return False
 
         return all(predicate(item) for predicate in predicates)
-    
+
     return (deepcopy(i) for i in filter(main_predicate, items))
 
 
@@ -59,6 +59,12 @@ class Query:
 
     def contains(self, other):
         return predicates.Contains(self._keys, other, self._getter)
+
+    def _is(self, other):
+        return predicates.Is(self._keys, other, self._getter)
+
+    def _is_not(self, other):
+        return predicates.IsNot(self._keys, other, self._getter)
 
 
 def retrieve_attr(obj: Any, *names: str):
