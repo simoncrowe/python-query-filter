@@ -34,7 +34,7 @@ def qfilter(items: Iterable, *predicates, **kwargs) -> Iterable[Any]:
 class Query:
     def __init__(self, *keys, getter: Callable):
         self._keys = keys
-        self._getter
+        self._getter = getter
 
     def __lt__(self, other):
         return predicates.LessThan(self._keys, other, self._getter)
@@ -74,10 +74,8 @@ def retrieve_attr(obj: Any, *names: str):
         return None
 
 
-class Attr(Query):
-    def __init__(self, names: str, getter=retrieve_attr):
-        self._keys = names.split(".")
-        self._getter = getter
+def attr(path: str):
+    return Query(*path.split(), getter=retrieve_attr)
 
 
 def retrieve_item(obj: Mapping, *keys: Hashable):
@@ -87,8 +85,6 @@ def retrieve_item(obj: Mapping, *keys: Hashable):
         return None
 
 
-class Item(Query):
-    def __init__(self, *keys: Iterable[Hashable], getter=retrieve_item):
-        self._keys = keys
-        self._getter = getter
+def item(*keys: Hashable):
+    return Query(*keys, getter=retrieve_item)
 

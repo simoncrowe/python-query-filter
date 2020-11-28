@@ -86,7 +86,7 @@ def test_filter_keyword_args(users, user_four):
 
 
 def test_filter_keyword_args_empty_results(users):
-    expected = tuple() 
+    expected = tuple()
 
     results = tuple(
         qfilter(users,
@@ -94,7 +94,7 @@ def test_filter_keyword_args_empty_results(users):
                      last_name="Philipeaux",
                      email="gcristou4@si.edu")
     )
-    
+
     assert results == expected
 
 
