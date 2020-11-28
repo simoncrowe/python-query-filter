@@ -1,6 +1,9 @@
+from functools import reduce
+from operator import getitem
+
 import pytest
 
-from query_filter.filter import qfilter
+from query_filter.filter import kfilter, kpredicate, split_key
 
 
 @pytest.fixture
@@ -62,15 +65,44 @@ def users(user_one, user_two, user_three, user_four, user_five):
     return (user_one, user_two, user_three, user_four, user_five)
 
 
-def test_filter_does_not_return_imput_object_references(users):
-    for in_user, out_user in zip(users, qfilter(users)):
+def get(obj, *keys):
+    """Simple item getter for testing purposes."""
+    return reduce(getitem, keys, obj)
+
+
+@pytest.mark.parametrize(
+    "key",
+    ["__", "___", "_____ ", "__lt", "a__", "a__b__", "__a__gt"]
+)
+def test_split_key_fails_if_not_formatted_correctly(key):
+    with pytest.raises(ValueError):
+        split_key(key)
+
+@pytest.mark.parametrize(
+    "key,expected",
+    [
+        ("a", (["a"], "eq")),
+        ("a__b", (["a", "b"], "eq")),
+        ("a__b__c", (["a", "b", "c"], "eq")),
+        ("a__lte", (["a"], "lte")),
+        ("a__b__gte", (["a", "b"], "gte")),
+        ("a__b__c__in", (["a", "b", "c"], "in")),
+    ]
+)
+def test_split_key_produces_expected_results(key, expected):
+    result = split_key(key)
+    assert result == expected
+
+
+def test_kfilter_does_not_return_imput_object_references_by_default(users):
+    for in_user, out_user in zip(users, kfilter(users, get)):
         assert in_user is not out_user
 
 
 def test_filter_keyword_arg(users, user_one, user_four):
     expected = (user_one, user_four)
 
-    results = tuple(qfilter(users, gender="Female"))
+    results = tuple(kfilter(users, get, gender="Female"))
 
     assert results == expected
 
@@ -79,7 +111,7 @@ def test_filter_keyword_args(users, user_four):
     expected = (user_four,)
 
     results = tuple(
-        qfilter(users, gender="Female", last_name="Philipeaux")
+        kfilter(users, get, gender="Female", last_name="Philipeaux")
     )
 
     assert results == expected
@@ -89,10 +121,10 @@ def test_filter_keyword_args_empty_results(users):
     expected = tuple()
 
     results = tuple(
-        qfilter(users,
-                     gender="Female",
-                     last_name="Philipeaux",
-                     email="gcristou4@si.edu")
+        kfilter(users, get,
+                gender="Female",
+                last_name="Philipeaux",
+                email="gcristou4@si.edu")
     )
 
     assert results == expected
@@ -104,7 +136,7 @@ def test_predicate_arg(users, user_two, user_four):
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(qfilter(users, id_is_even))
+    results = tuple(kfilter(users, get, id_is_even))
 
     assert results == expected
 
@@ -118,7 +150,7 @@ def test_predicate_args(users, user_one):
     def email_is_dot_com(item):
         return item["email"].endswith(".com")
 
-    results = tuple(qfilter(users, id_is_odd, email_is_dot_com))
+    results = tuple(kfilter(users, get, id_is_odd, email_is_dot_com))
 
     assert results == expected
 
@@ -129,6 +161,6 @@ def test_predicate_arg_with_keyword_arg(users, user_two):
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(qfilter(users, id_is_even, gender="Male"))
+    results = tuple(kfilter(users, get, id_is_even, gender="Male"))
 
     assert results == expected
