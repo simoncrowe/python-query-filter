@@ -1,1 +1,1 @@
-from query_filter.filter import qfilter
+from query_filter.filter import attr, item, qfilter

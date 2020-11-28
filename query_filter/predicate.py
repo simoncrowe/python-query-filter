@@ -1,7 +1,4 @@
-from abc import ABC, abstractmethod
-from functools import reduce, wraps
-from operator import getitem
-from typing import Any, Callable, Hashable, Iterable, Mapping
+from typing import Any, Callable, Iterable
 
 
 def query_predicate(predicate: Callable):
@@ -74,4 +71,3 @@ def _is(obj: Any, criteria: Any):
 @query_predicate
 def _is_not(obj: Any, criteria: Any):
     return obj is not criteria
-

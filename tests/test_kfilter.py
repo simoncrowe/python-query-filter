@@ -3,7 +3,7 @@ from operator import getitem
 
 import pytest
 
-from query_filter.filter import kfilter, kpredicate, split_key
+from query_filter.filter import kfilter, split_key
 
 
 @pytest.fixture
@@ -49,6 +49,7 @@ def user_four():
         "gender": "Female",
     }
 
+
 @pytest.fixture
 def user_five():
     return {
@@ -77,6 +78,7 @@ def get(obj, *keys):
 def test_split_key_fails_if_not_formatted_correctly(key):
     with pytest.raises(ValueError):
         split_key(key)
+
 
 @pytest.mark.parametrize(
     "key,expected",

@@ -33,7 +33,7 @@ def left_node():
 
 @pytest.fixture
 def right_node(right_right_node):
-    right =  Node(2)
+    right = Node(2)
     right.right = right_right_node
     return right
 
@@ -64,8 +64,8 @@ def test_retrieve_attr_three_keys(root_node, right_right_node):
 
 
 def test_retrieve_attr_three_keys_to_nonexistant_attr(root_node):
-    result = retrieve_attr(root_node , "left", "left", "data")
-    assert result == None
+    result = retrieve_attr(root_node, "left", "left", "data")
+    assert result is None
 
 
 def test_retrieve_item_single_key(tree_dict, root_node):
@@ -84,22 +84,17 @@ def test_retrieve_item_three_keys(tree_dict, right_right_node):
 
 
 def test_retrieve_item_three_keys_to_nonexistant_item(tree_dict):
-    result = retrieve_item(tree_dict , "left", "left", "data")
-    assert result == None
+    result = retrieve_item(tree_dict, "left", "left", "data")
+    assert result is None
 
 
 def test_retrive_item_index():
     items = ["zero", "one", "two", "tree"]
-
     result = retrieve_item(items, 1)
-
     assert result == "one"
 
 
 def test_retrive_item_index_out_of_range():
     items = ["zero", "one", "two", "tree"]
-
     result = retrieve_item(items, 9)
-
-    assert result == None
-test_retrieve_attr_three_keys
+    assert result is None

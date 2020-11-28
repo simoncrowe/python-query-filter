@@ -3,7 +3,7 @@ from operator import getitem
 
 import pytest
 
-from query_filter.filter import qfilter, Query, retrieve_item
+from query_filter.filter import qfilter, Query
 
 
 @pytest.fixture
@@ -153,7 +153,7 @@ def test_is_in_string(addresses, address_one, address_two):
 
 
 def test_list_contains():
-    primes =  {"type": "prime", "numbers": [2, 3, 5, 7, 11]}
+    primes = {"type": "prime", "numbers": [2, 3, 5, 7, 11]}
     odd = {"type": "odd", "numbers": [1, 3, 5, 7, 9]}
     even = {"type": "even", "numbers": [0, 2, 4, 6, 8]}
     sequences = [primes, odd, even]
@@ -166,7 +166,6 @@ def test_list_contains():
     )
 
     assert actual == expected
-
 
 
 def test_string_contains():
@@ -194,11 +193,9 @@ def test_is():
     thing_two_data = {"id": 1, "thing": thing_two}
     things_data = [thing_one_data, thing_two_data]
 
-    expected = [thing_two_data]
-
     actual = list(
         qfilter(things_data,
-                Query("thing",getter=get)._is(thing_two))
+                Query("thing", getter=get)._is(thing_two))
     )
 
     assert len(actual) == 1
@@ -214,8 +211,6 @@ def test_is_not():
     thing_two_data = {"id": 1, "thing": thing_two}
     things_data = [thing_one_data, thing_two_data]
 
-    expected = [thing_two_data]
-
     actual = list(
         qfilter(things_data,
                 Query("thing", getter=get)._is_not(thing_two))
@@ -223,5 +218,3 @@ def test_is_not():
 
     assert len(actual) == 1
     assert actual[0]["id"] == thing_one_data["id"]
-
-
