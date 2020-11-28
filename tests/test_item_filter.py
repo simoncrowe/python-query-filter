@@ -54,16 +54,59 @@ def address_five():
 
 
 @pytest.fixture
-def addresses(address_one, address_two, address_three, address_four, address_five):
+def addresses(address_one, address_two, address_three,
+              address_four, address_five):
     return [
         address_one, address_two, address_three, address_four, address_five
     ]
 
 
-def test_equality(addresses, address_two, address_three, address_four):
+def test_equal(addresses, address_two, address_three, address_four):
     expected = [address_two, address_three, address_four]
 
     actual = list(qfilter(addresses, Item("state") == "California"))
+
+    assert actual == expected
+
+
+def test_not_equal(addresses, address_one, address_five):
+    expected = [address_one, address_five]
+
+    actual = list(qfilter(addresses, Item("state") != "California"))
+
+    assert actual == expected
+
+
+def test_less_than(addresses, address_one, address_two):
+    expected = [address_one, address_two]
+
+    actual = list(qfilter(addresses, Item("id") < 3))
+
+    assert actual == expected
+
+
+def test_less_than_or_equal(addresses, address_one,
+                            address_two, address_three):
+    expected = [address_one, address_two, address_three]
+
+    actual = list(qfilter(addresses, Item("id") <= 3))
+
+    assert actual == expected
+
+
+def test_greater_than(addresses, address_four, address_five):
+    expected = [address_four, address_five]
+
+    actual = list(qfilter(addresses, Item("id") > 3))
+
+    assert actual == expected
+
+
+def test_greater_than_or_equal(addresses, address_three,
+                               address_four, address_five):
+    expected = [address_three, address_four, address_five]
+
+    actual = list(qfilter(addresses, Item("id") >= 3))
 
     assert actual == expected
 

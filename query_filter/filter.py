@@ -43,7 +43,7 @@ class Attr:
         self._names = names
 
     def __eq__(self, other):
-        return predicates.Equals(self._names, other, getter=retrieve_attr)
+        return predicates.Equal(self._names, other, getter=retrieve_attr)
 
 
 def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
@@ -57,6 +57,25 @@ class Item:
     def __init__(self, *keys):
         self._keys = keys
 
+    def __lt__(self, other):
+        return predicates.LessThan(self._keys, other, getter=retrieve_item)
+
+    def __le__(self, other):
+        return predicates.LessThanOrEqual(self._keys,
+                                          other,
+                                          getter=retrieve_item)
+
     def __eq__(self, other):
-        return predicates.Equals(self._keys, other, getter=retrieve_item)
+        return predicates.Equal(self._keys, other, getter=retrieve_item)
+
+    def __ne__(self, other):
+        return predicates.NotEqual(self._keys, other, getter=retrieve_item)
+
+    def __gt__(self, other):
+        return predicates.GreaterThan(self._keys, other, getter=retrieve_item)
+
+    def __ge__(self, other):
+        return predicates.GreaterThanOrEqual(self._keys,
+                                             other,
+                                             getter=retrieve_item)
 

@@ -35,8 +35,39 @@ class Predicate(ABC):
         pass
 
 
-class Equals(Predicate):
+class LessThan(Predicate):
+
+    def evaluate(self, obj: Any, criteria: Any):
+        return obj < criteria
+
+
+class LessThanOrEqual(Predicate):
+
+    def evaluate(selt, obj: Any, criteria: Any):
+        return obj <= criteria
+
+
+class Equal(Predicate):
 
     def evaluate(self, obj: Any, criteria: Any):
         return obj == criteria
+
+
+class NotEqual(Predicate):
+
+    def evaluate(selt, obj: Any, criteria: Any):
+        return obj != criteria
+
+
+class GreaterThan(Predicate):
+
+    def evaluate(self, obj: Any, criteria: Any):
+        return obj > criteria
+
+
+class GreaterThanOrEqual(Predicate):
+
+    def evaluate(selt, obj: Any, criteria: Any):
+        return obj >= criteria
+
 
