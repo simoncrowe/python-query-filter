@@ -14,7 +14,7 @@ def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
 class Predicate(ABC):
 
     def __init__(self,
-                 keys: Iterable[Hashable],
+                 keys: Any,
                  criteria: Any,
                  getter: Callable):
 
@@ -23,7 +23,7 @@ class Predicate(ABC):
         self._get = getter
 
     def __call__(self, obj: Any) -> bool:
-        evaluated_obj = self._get(obj, self._keys)
+        evaluated_obj = self._get(obj, *self._keys)
 
         if evaluated_obj is None:
             return False

@@ -49,41 +49,57 @@ def tree_dict(root_node):
 
 
 def test_retrieve_attr_single_key(root_node):
-    result = retrieve_attr(root_node, ("data",))
+    result = retrieve_attr(root_node, "data")
     assert result == root_node.data
 
 
 def test_retrieve_attr_two_keys(root_node, left_node):
-    result = retrieve_attr(root_node, ("left", "data"))
+    result = retrieve_attr(root_node, "left", "data")
     assert result == left_node.data
 
 
 def test_retrieve_attr_three_keys(root_node, right_right_node):
-    result = retrieve_attr(root_node, ("right", "right", "data"))
+    result = retrieve_attr(root_node, "right", "right", "data")
     assert result == right_right_node.data
 
 
-def test_retrieve_atte_three_keys_to_nonexistant_attr(root_node):
-    result = retrieve_attr(root_node , ("left", "left", "data"))
+def test_retrieve_attr_three_keys_to_nonexistant_attr(root_node):
+    result = retrieve_attr(root_node , "left", "left", "data")
     assert result == None
 
 
 def test_retrieve_item_single_key(tree_dict, root_node):
-    result = retrieve_item(tree_dict, ("data",))
+    result = retrieve_item(tree_dict, "data")
     assert result == root_node.data
 
 
 def test_retrieve_item_two_keys(tree_dict, left_node):
-    result = retrieve_item(tree_dict, ("left", "data"))
+    result = retrieve_item(tree_dict, "left", "data")
     assert result == left_node.data
 
 
 def test_retrieve_item_three_keys(tree_dict, right_right_node):
-    result = retrieve_item(tree_dict, ("right", "right", "data"))
+    result = retrieve_item(tree_dict, "right", "right", "data")
     assert result == right_right_node.data
 
 
-def test_retrieve_atte_three_keys_to_nonexistant_attr(tree_dict):
-    result = retrieve_attr(tree_dict , ("left", "left", "data"))
+def test_retrieve_item_three_keys_to_nonexistant_item(tree_dict):
+    result = retrieve_item(tree_dict , "left", "left", "data")
     assert result == None
 
+
+def test_retrive_item_index():
+    items = ["zero", "one", "two", "tree"]
+
+    result = retrieve_item(items, 1)
+
+    assert result == "one"
+
+
+def test_retrive_item_index_out_of_range():
+    items = ["zero", "one", "two", "tree"]
+
+    result = retrieve_item(items, 9)
+
+    assert result == None
+test_retrieve_attr_three_keys

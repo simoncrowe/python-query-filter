@@ -59,7 +59,7 @@ class Query:
                                              getter=self._getter)
 
 
-def retrieve_attr(obj: Any, names: Iterable[str]):
+def retrieve_attr(obj: Any, *names :str):
     try:
         return reduce(getattr, names, obj)
     except AttributeError:
@@ -67,15 +67,15 @@ def retrieve_attr(obj: Any, names: Iterable[str]):
 
 
 class Attr(Query):
-    def __init__(self, keys: str, getter=retrieve_attr):
-        self._keys = keys
+    def __init__(self, names: str, getter=retrieve_attr):
+        self._keys = names.split(".")
         self._getter = getter
 
 
-def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
+def retrieve_item(obj: Mapping, *keys: Hashable):
     try:
         return reduce(getitem, keys, obj)
-    except KeyError:
+    except (IndexError, KeyError, TypeError):
         return None
 
 
