@@ -19,9 +19,7 @@ def _simple_keywords_predicate(filter_kwargs: dict):
     return predicate
 
 
-def qfilter(items: Iterable, *predicates, **kwargs):
-    items_copy = deepcopy(items)
-    
+def qfilter(items: Iterable, *predicates, **kwargs) -> Iterable[Any]:
     kwargs_predicate = _simple_keywords_predicate(kwargs)
 
     def main_predicate(item):
@@ -30,7 +28,7 @@ def qfilter(items: Iterable, *predicates, **kwargs):
 
         return all(predicate(item) for predicate in predicates)
     
-    return filter(main_predicate, items_copy)
+    return (deepcopy(i) for i in filter(main_predicate, items))
 
 
 def retrieve_attr(obj: Any, names: Iterable[str]):
