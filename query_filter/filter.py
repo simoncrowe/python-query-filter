@@ -37,34 +37,34 @@ class Query:
         self._getter = getter
 
     def __lt__(self, other):
-        return predicates.LessThan(self._keys, other, self._getter)
+        return predicates.lt(other, self._getter, self._keys)
 
     def __le__(self, other):
-        return predicates.LessThanOrEqual(self._keys, other, self._getter)
+        return predicates.lte(other, self._getter, self._keys)
 
     def __eq__(self, other):
-        return predicates.Equal(self._keys, other, self._getter)
+        return predicates.eq(other, self._getter, self._keys)
 
     def __ne__(self, other):
-        return predicates.NotEqual(self._keys, other, self._getter)
+        return predicates.ne(other, self._getter, self._keys)
 
     def __gt__(self, other):
-        return predicates.GreaterThan(self._keys, other, self._getter)
+        return predicates.gt(other, self._getter, self._keys)
 
     def __ge__(self, other):
-        return predicates.GreaterThanOrEqual(self._keys, other, self._getter)
+        return predicates.gte(other, self._getter, self._keys)
 
     def is_in(self, other):
-        return predicates.IsIn(self._keys, other, self._getter)
+        return predicates.is_in(other, self._getter, self._keys)
 
     def contains(self, other):
-        return predicates.Contains(self._keys, other, self._getter)
+        return predicates.contains(other, self._getter, self._keys)
 
     def _is(self, other):
-        return predicates.Is(self._keys, other, self._getter)
+        return predicates._is(other, self._getter, self._keys)
 
     def _is_not(self, other):
-        return predicates.IsNot(self._keys, other, self._getter)
+        return predicates._is_not(other, self._getter, self._keys)
 
 
 def retrieve_attr(obj: Any, *names: str):

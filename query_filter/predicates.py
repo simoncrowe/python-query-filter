@@ -1,96 +1,77 @@
 from abc import ABC, abstractmethod
-from functools import reduce
+from functools import reduce, wraps
 from operator import getitem
 from typing import Any, Callable, Hashable, Iterable, Mapping
 
 
-def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
-    try:
-        return reduce(getitem, keys, obj)
-    except KeyError:
-        return None
+def query_predicate(predicate: Callable):
+    """
+    Decorates functions that evaluate something against some criteria.
+
+    The immediate output is a function that accepts the criteria by which
+    an object is to be evaluated and the means of getting this object from
+    a "root" object. This funtion returns a predicate that evaluates any
+    "root" object accoring to these criteria, using the decorated function.
+    """
+    def pred_maker(criteria: Any, getter: Callable, keys: Iterable[Any]):
+
+        def pred(obj: Any):
+            evaluated = getter(obj, *keys)
+            if evaluated is None:
+                return False
+            return predicate(evaluated, criteria)
+
+        return pred
+
+    return pred_maker
 
 
-class Predicate(ABC):
-
-    def __init__(self,
-                 keys: Any,
-                 criteria: Any,
-                 getter: Callable):
-
-        self._keys = keys
-        self._criteria = criteria
-        self._get = getter
-
-    def __call__(self, obj: Any) -> bool:
-        evaluated_obj = self._get(obj, *self._keys)
-
-        if evaluated_obj is None:
-            return False
-
-        return self.evaluate(evaluated_obj, self._criteria)
-
-    @abstractmethod
-    def evaluate(obj: Any, criteria: Any) -> bool:
-        pass
+@query_predicate
+def lt(evaluated: Any, criteria: Any):
+    return evaluated < criteria
 
 
-class LessThan(Predicate):
-
-    def evaluate(self, obj: Any, criteria: Any):
-        return obj < criteria
-
-
-class LessThanOrEqual(Predicate):
-
-    def evaluate(selt, obj: Any, criteria: Any):
-        return obj <= criteria
+@query_predicate
+def lte(obj: Any, criteria: Any):
+    return obj <= criteria
 
 
-class Equal(Predicate):
-
-    def evaluate(self, obj: Any, criteria: Any):
-        return obj == criteria
-
-
-class NotEqual(Predicate):
-
-    def evaluate(selt, obj: Any, criteria: Any):
-        return obj != criteria
+@query_predicate
+def eq(obj: Any, criteria: Any):
+    return obj == criteria
 
 
-class GreaterThan(Predicate):
-
-    def evaluate(self, obj: Any, criteria: Any):
-        return obj > criteria
-
-
-class GreaterThanOrEqual(Predicate):
-
-    def evaluate(selt, obj: Any, criteria: Any):
-        return obj >= criteria
+@query_predicate
+def ne(obj: Any, criteria: Any):
+    return obj != criteria
 
 
-class IsIn(Predicate):
-
-    def evaluate(selt, obj: Any, criteria: Any):
-        return obj in criteria
-
-
-class Contains(Predicate):
-
-    def evaluate(selt, obj: Any, criteria: Any):
-        return criteria in obj
+@query_predicate
+def gt(obj: Any, criteria: Any):
+    return obj > criteria
 
 
-class Is(Predicate):
+@query_predicate
+def gte(obj: Any, criteria: Any):
+    return obj >= criteria
 
-    def evaluate(selt, obj: Any, criteria: Any):
-        return obj is criteria
+
+@query_predicate
+def is_in(obj: Any, criteria: Any):
+    return obj in criteria
 
 
-class IsNot(Predicate):
+@query_predicate
+def contains(obj: Any, criteria: Any):
+    return criteria in obj
 
-    def evaluate(selt, obj: Any, criteria: Any):
-        return obj is not criteria
+
+@query_predicate
+def _is(obj: Any, criteria: Any):
+    return obj is criteria
+
+
+@query_predicate
+def _is_not(obj: Any, criteria: Any):
+    return obj is not criteria
 
