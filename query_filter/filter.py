@@ -1,7 +1,7 @@
 from copy import deepcopy
 from functools import reduce
 from operator import getitem
-from typing import Any, Hashable, Iterable, Mapping
+from typing import Any, Callable,Hashable, Iterable, Mapping
 
 from query_filter import predicates
 
@@ -31,6 +31,34 @@ def qfilter(items: Iterable, *predicates, **kwargs) -> Iterable[Any]:
     return (deepcopy(i) for i in filter(main_predicate, items))
 
 
+class Query:
+    def __init__(self, *keys, getter: Callable):
+        self._keys = keys
+        self._getter
+
+    def __lt__(self, other):
+        return predicates.LessThan(self._keys, other, getter=self._getter)
+
+    def __le__(self, other):
+        return predicates.LessThanOrEqual(self._keys,
+                                          other,
+                                          getter=self._getter)
+
+    def __eq__(self, other):
+        return predicates.Equal(self._keys, other, getter=self._getter)
+
+    def __ne__(self, other):
+        return predicates.NotEqual(self._keys, other, getter=self._getter)
+
+    def __gt__(self, other):
+        return predicates.GreaterThan(self._keys, other, getter=self._getter)
+
+    def __ge__(self, other):
+        return predicates.GreaterThanOrEqual(self._keys,
+                                             other,
+                                             getter=self._getter)
+
+
 def retrieve_attr(obj: Any, names: Iterable[str]):
     try:
         return reduce(getattr, names, obj)
@@ -38,12 +66,10 @@ def retrieve_attr(obj: Any, names: Iterable[str]):
         return None
 
 
-class Attr:
-    def __init__(self, *names):
-        self._names = names
-
-    def __eq__(self, other):
-        return predicates.Equal(self._names, other, getter=retrieve_attr)
+class Attr(Query):
+    def __init__(self, keys: str, getter=retrieve_attr):
+        self._keys = keys
+        self._getter = getter
 
 
 def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
@@ -53,29 +79,8 @@ def retrieve_item(obj: Mapping, keys: Iterable[Hashable]):
         return None
 
 
-class Item:
-    def __init__(self, *keys):
+class Item(Query):
+    def __init__(self, *keys: Iterable[Hashable], getter=retrieve_item):
         self._keys = keys
-
-    def __lt__(self, other):
-        return predicates.LessThan(self._keys, other, getter=retrieve_item)
-
-    def __le__(self, other):
-        return predicates.LessThanOrEqual(self._keys,
-                                          other,
-                                          getter=retrieve_item)
-
-    def __eq__(self, other):
-        return predicates.Equal(self._keys, other, getter=retrieve_item)
-
-    def __ne__(self, other):
-        return predicates.NotEqual(self._keys, other, getter=retrieve_item)
-
-    def __gt__(self, other):
-        return predicates.GreaterThan(self._keys, other, getter=retrieve_item)
-
-    def __ge__(self, other):
-        return predicates.GreaterThanOrEqual(self._keys,
-                                             other,
-                                             getter=retrieve_item)
+        self._getter = getter
 
