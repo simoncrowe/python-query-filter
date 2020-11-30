@@ -96,11 +96,6 @@ def test_split_key_produces_expected_results(key, expected):
     assert result == expected
 
 
-def test_k_filter_all_returns_copies_by_default(users):
-    for in_user, out_user in zip(users, k_filter_all(users, get)):
-        assert in_user is not out_user
-
-
 def test_filter_keyword_arg(users, user_one, user_four):
     expected = (user_one, user_four)
 
