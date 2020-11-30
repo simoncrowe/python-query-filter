@@ -3,7 +3,7 @@ from operator import getitem
 
 import pytest
 
-from query_filter.filter import kfilter, split_key
+from query_filter.filter import k_filter_all, split_key
 
 
 @pytest.fixture
@@ -96,15 +96,15 @@ def test_split_key_produces_expected_results(key, expected):
     assert result == expected
 
 
-def test_kfilter_does_not_return_imput_object_references_by_default(users):
-    for in_user, out_user in zip(users, kfilter(users, get)):
+def test_k_filter_all_returns_copies_by_default(users):
+    for in_user, out_user in zip(users, k_filter_all(users, get)):
         assert in_user is not out_user
 
 
 def test_filter_keyword_arg(users, user_one, user_four):
     expected = (user_one, user_four)
 
-    results = tuple(kfilter(users, get, gender="Female"))
+    results = tuple(k_filter_all(users, get, gender="Female"))
 
     assert results == expected
 
@@ -113,7 +113,7 @@ def test_filter_keyword_args(users, user_four):
     expected = (user_four,)
 
     results = tuple(
-        kfilter(users, get, gender="Female", last_name="Philipeaux")
+        k_filter_all(users, get, gender="Female", last_name="Philipeaux")
     )
 
     assert results == expected
@@ -123,10 +123,10 @@ def test_filter_keyword_args_empty_results(users):
     expected = tuple()
 
     results = tuple(
-        kfilter(users, get,
-                gender="Female",
-                last_name="Philipeaux",
-                email="gcristou4@si.edu")
+        k_filter_all(users, get,
+                     gender="Female",
+                     last_name="Philipeaux",
+                     email="gcristou4@si.edu")
     )
 
     assert results == expected
@@ -138,7 +138,7 @@ def test_predicate_arg(users, user_two, user_four):
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(kfilter(users, get, id_is_even))
+    results = tuple(k_filter_all(users, get, id_is_even))
 
     assert results == expected
 
@@ -152,7 +152,7 @@ def test_predicate_args(users, user_one):
     def email_is_dot_com(item):
         return item["email"].endswith(".com")
 
-    results = tuple(kfilter(users, get, id_is_odd, email_is_dot_com))
+    results = tuple(k_filter_all(users, get, id_is_odd, email_is_dot_com))
 
     assert results == expected
 
@@ -163,6 +163,6 @@ def test_predicate_arg_with_keyword_arg(users, user_two):
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(kfilter(users, get, id_is_even, gender="Male"))
+    results = tuple(k_filter_all(users, get, id_is_even, gender="Male"))
 
     assert results == expected

@@ -3,7 +3,7 @@ from operator import getitem
 
 import pytest
 
-from query_filter.filter import qfilter, Query
+from query_filter.filter import q_filter, Query
 
 
 @pytest.fixture
@@ -73,8 +73,8 @@ def test_equal(addresses, address_two, address_three, address_four):
     expected = [address_two, address_three, address_four]
 
     actual = list(
-        qfilter(addresses,
-                Query("state", getter=get) == "California")
+        q_filter(addresses,
+                 Query("state", getter=get) == "California")
     )
 
     assert actual == expected
@@ -84,8 +84,8 @@ def test_not_equal(addresses, address_one, address_five):
     expected = [address_one, address_five]
 
     actual = list(
-        qfilter(addresses,
-                Query("state", getter=get) != "California")
+        q_filter(addresses,
+                 Query("state", getter=get) != "California")
     )
 
     assert actual == expected
@@ -94,7 +94,7 @@ def test_not_equal(addresses, address_one, address_five):
 def test_less_than(addresses, address_one, address_two):
     expected = [address_one, address_two]
 
-    actual = list(qfilter(addresses, Query("id", getter=get) < 3))
+    actual = list(q_filter(addresses, Query("id", getter=get) < 3))
 
     assert actual == expected
 
@@ -103,7 +103,7 @@ def test_less_than_or_equal(addresses, address_one,
                             address_two, address_three):
     expected = [address_one, address_two, address_three]
 
-    actual = list(qfilter(addresses, Query("id", getter=get) <= 3))
+    actual = list(q_filter(addresses, Query("id", getter=get) <= 3))
 
     assert actual == expected
 
@@ -111,7 +111,7 @@ def test_less_than_or_equal(addresses, address_one,
 def test_greater_than(addresses, address_four, address_five):
     expected = [address_four, address_five]
 
-    actual = list(qfilter(addresses, Query("id", getter=get) > 3))
+    actual = list(q_filter(addresses, Query("id", getter=get) > 3))
 
     assert actual == expected
 
@@ -120,7 +120,7 @@ def test_greater_than_or_equal(addresses, address_three,
                                address_four, address_five):
     expected = [address_three, address_four, address_five]
 
-    actual = list(qfilter(addresses, Query("id", getter=get) >= 3))
+    actual = list(q_filter(addresses, Query("id", getter=get) >= 3))
 
     assert actual == expected
 
@@ -129,8 +129,8 @@ def test_is_in_list(addresses, address_one, address_five):
     expected = [address_one, address_five]
 
     actual = list(
-        qfilter(addresses,
-                Query("state", getter=get).is_in(["Texas", "Massachusetts"]))
+        q_filter(addresses,
+                 Query("state", getter=get).is_in(["Texas", "Massachusetts"]))
     )
 
     assert actual == expected
@@ -140,7 +140,7 @@ def test_is_in_string(addresses, address_one, address_two):
     expected = [address_one, address_two]
 
     actual = list(
-        qfilter(
+        q_filter(
             addresses,
             Query(
                 "post_code",
@@ -161,8 +161,8 @@ def test_list_contains():
     expected = [primes, even]
 
     actual = list(
-        qfilter(sequences,
-                Query("numbers", getter=get).contains(2))
+        q_filter(sequences,
+                 Query("numbers", getter=get).contains(2))
     )
 
     assert actual == expected
@@ -177,8 +177,8 @@ def test_string_contains():
     expected = [turbid_dic, turgid_dic]
 
     actual = list(
-        qfilter(words,
-                Query("word", getter=get).contains("u"))
+        q_filter(words,
+                 Query("word", getter=get).contains("u"))
     )
 
     assert actual == expected
@@ -194,8 +194,8 @@ def test_is():
     things_data = [thing_one_data, thing_two_data]
 
     actual = list(
-        qfilter(things_data,
-                Query("thing", getter=get)._is(thing_two))
+        q_filter(things_data,
+                 Query("thing", getter=get)._is(thing_two))
     )
 
     assert len(actual) == 1
@@ -212,8 +212,8 @@ def test_is_not():
     things_data = [thing_one_data, thing_two_data]
 
     actual = list(
-        qfilter(things_data,
-                Query("thing", getter=get)._is_not(thing_two))
+        q_filter(things_data,
+                 Query("thing", getter=get)._is_not(thing_two))
     )
 
     assert len(actual) == 1
