@@ -7,11 +7,46 @@ from typing import Any, Callable, Hashable, Iterable, Mapping
 from query_filter import predicate
 
 
-def qfilter(items: Iterable, *preds) -> Iterable[Any]:
+def qfilter_any(items: Iterable, *preds) -> Iterable[Any]:
+    def main_predicate(item):
+        return any(pred(item) for pred in preds)
+
+    return (deepcopy(i) for i in filter(main_predicate, items))
+
+
+def qfilter_not_any(items: Iterable, *preds) -> Iterable[Any]:
+    def main_predicate(item):
+        return not any(pred(item) for pred in preds)
+
+    return (deepcopy(i) for i in filter(main_predicate, items))
+
+
+def qfilter_all(items: Iterable, *preds) -> Iterable[Any]:
     def main_predicate(item):
         return all(pred(item) for pred in preds)
 
     return (deepcopy(i) for i in filter(main_predicate, items))
+
+
+qfilter = qfilter_all
+
+
+def qall(*preds: Callable) -> Callable:
+    def all_pred(obj: Any):
+        return all(pred(obj) for pred in preds)
+    return all_pred
+
+
+def qany(*preds: Callable) -> Callable:
+    def all_pred(obj: Any):
+        return any(pred(obj) for pred in preds)
+    return all_pred
+
+
+def qnot(pred: Callable) -> Callable:
+    def not_pred(obj: Any):
+        return not pred(obj)
+    return not_pred
 
 
 class Query:
@@ -89,7 +124,6 @@ _filter_preds = {
 def split_key(key: str):
     *keys, operation_name = key.split("__")
 
-    # equality is used by defaul
     if operation_name not in _filter_preds:
         keys.append(operation_name)
         operation_name = "eq"

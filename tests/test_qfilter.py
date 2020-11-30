@@ -1,220 +1,231 @@
-from functools import reduce
-from operator import getitem
-
 import pytest
 
-from query_filter.filter import qfilter, Query
+from query_filter.filter import (
+    item,
+    qall,
+    qany,
+    qfilter_all,
+    qfilter_any,
+    qfilter_not_any,
+    qnot,
+)
 
 
 @pytest.fixture
-def address_one():
+def trial_one():
     return {
         "id": 1,
-        "address": "41289 Hayes Street",
-        "post_code": "01152",
-        "state": "Massachusetts"
+        "date": "2003-04-11",
+        "species": "Streptopelia senegalensis",
+        "drug": "HELMINTHOSPORIUM SOROKINIANUM",
+        "dose_mg": 67.9,
+        "survived": True
     }
 
 
 @pytest.fixture
-def address_two():
+def trial_two():
     return {
         "id": 2,
-        "address": "182 Killdeer Alley",
-        "post_code": "92415",
-        "state": "California"
+        "date": "2013-05-20",
+        "species": "Geococcyx californianus",
+        "drug": "ENSULIZOLE, OCTINOXATE, and TITANIUM DIOXIDE",
+        "dose_mg": 829.66,
+        "survived": True
     }
 
 
 @pytest.fixture
-def address_three():
+def trial_three():
     return {
         "id": 3,
-        "address": "1 Amoth Park",
-        "post_code": "92153",
-        "state": "California"
+        "date": "2003-08-09",
+        "species": "Neophron percnopterus",
+        "drug": "tolterodine tartrate",
+        "dose_mg": 421.28,
+        "survived": False
     }
 
 
 @pytest.fixture
-def address_four():
+def trial_four():
     return {
         "id": 4,
-        "address": "3 Park Meadow Street",
-        "post_code": "93106",
-        "state": "California"
+        "date": "2017-06-19",
+        "species": "Merops nubicus",
+        "drug": "Lorazepam",
+        "dose_mg": 377.18,
+        "survived": False
     }
 
 
 @pytest.fixture
-def address_five():
+def trial_five():
     return {
         "id": 5,
-        "address": "19 Crest Line Junction",
-        "post_code": "76016",
-        "state": "Texas"
+        "date": "2016-12-12",
+        "species": "Dasypus novemcinctus",
+        "drug": "Nicotine Polacrilex",
+        "dose_mg": 147.47,
+        "survived": False
     }
 
 
 @pytest.fixture
-def addresses(address_one, address_two, address_three,
-              address_four, address_five):
-    return [
-        address_one, address_two, address_three, address_four, address_five
-    ]
+def all_trials(trial_one, trial_two, trial_three, trial_four, trial_five):
+    return [trial_one, trial_two, trial_three, trial_four, trial_five]
 
 
-def get(obj, *keys):
-    """Simple item getter for testing"""
-    return reduce(getitem, keys, obj)
+def test_qfilter_all_with_two_predicates(all_trials, trial_one):
+    expected = [trial_one]
+
+    results = qfilter_all(all_trials,
+                         item("survived") == True,
+                         item("date").contains("2003"))
+
+    assert list(results) == expected
 
 
-def test_equal(addresses, address_two, address_three, address_four):
-    expected = [address_two, address_three, address_four]
+def test_qfilter_all_with_three_predicates(all_trials, trial_three):
+    expected = [trial_three]
 
-    actual = list(
-        qfilter(addresses,
-                Query("state", getter=get) == "California")
-    )
+    results = qfilter_all(all_trials,
+                         item("survived") == False,
+                         item("drug") == "tolterodine tartrate",
+                         item("dose_mg") > 350)
 
-    assert actual == expected
-
-
-def test_not_equal(addresses, address_one, address_five):
-    expected = [address_one, address_five]
-
-    actual = list(
-        qfilter(addresses,
-                Query("state", getter=get) != "California")
-    )
-
-    assert actual == expected
+    assert list(results) == expected
 
 
-def test_less_than(addresses, address_one, address_two):
-    expected = [address_one, address_two]
+def test_qfilter_any_with_two_predicates(
+    all_trials, trial_one, trial_two, trial_three
+):
+    expected = [trial_one, trial_two, trial_three]
 
-    actual = list(qfilter(addresses, Query("id", getter=get) < 3))
+    results = qfilter_any(all_trials,
+                         item("survived") == True,
+                         item("date").contains("2003"))
 
-    assert actual == expected
-
-
-def test_less_than_or_equal(addresses, address_one,
-                            address_two, address_three):
-    expected = [address_one, address_two, address_three]
-
-    actual = list(qfilter(addresses, Query("id", getter=get) <= 3))
-
-    assert actual == expected
+    assert list(results) == expected
 
 
-def test_greater_than(addresses, address_four, address_five):
-    expected = [address_four, address_five]
+def test_qfilter_any_with_three_predicates(
+    all_trials, trial_two, trial_three, trial_four, trial_five
+):
+    expected = [trial_two, trial_three, trial_four, trial_five]
 
-    actual = list(qfilter(addresses, Query("id", getter=get) > 3))
+    results = qfilter_any(all_trials,
+                         item("survived") == False,
+                         item("drug") == "tolterodine tartrate",
+                         item("dose_mg") > 350)
 
-    assert actual == expected
-
-
-def test_greater_than_or_equal(addresses, address_three,
-                               address_four, address_five):
-    expected = [address_three, address_four, address_five]
-
-    actual = list(qfilter(addresses, Query("id", getter=get) >= 3))
-
-    assert actual == expected
+    assert list(results) == expected
 
 
-def test_is_in_list(addresses, address_one, address_five):
-    expected = [address_one, address_five]
+def test_qfilter_not_any_with_two_predicates(all_trials, trial_four, trial_five):
+    expected = [trial_four, trial_five]
 
-    actual = list(
-        qfilter(addresses,
-                Query("state", getter=get).is_in(["Texas", "Massachusetts"]))
-    )
+    results = qfilter_not_any(all_trials,
+                             item("survived") == True,
+                             item("date").contains("2003"))
 
-    assert actual == expected
-
-
-def test_is_in_string(addresses, address_one, address_two):
-    expected = [address_one, address_two]
-
-    actual = list(
-        qfilter(
-            addresses,
-            Query(
-                "post_code",
-                getter=get
-            ).is_in("92415-241024-01152")
-        )
-    )
-
-    assert actual == expected
+    assert list(results) == expected
 
 
-def test_list_contains():
-    primes = {"type": "prime", "numbers": [2, 3, 5, 7, 11]}
-    odd = {"type": "odd", "numbers": [1, 3, 5, 7, 9]}
-    even = {"type": "even", "numbers": [0, 2, 4, 6, 8]}
-    sequences = [primes, odd, even]
+def test_qfilter_not__any_with_three_predicates(all_trials, trial_one):
+    expected = [trial_one]
 
-    expected = [primes, even]
+    results = qfilter_not_any(all_trials,
+                             item("survived") == False,
+                             item("drug") == "tolterodine tartrate",
+                             item("dose_mg") > 350)
 
-    actual = list(
-        qfilter(sequences,
-                Query("numbers", getter=get).contains(2))
-    )
-
-    assert actual == expected
+    assert list(results) == expected
 
 
-def test_string_contains():
-    torpid_dic = {"type": "adjective", "word": "torpid"}
-    turbid_dic = {"type": "adjective", "word": "turbid"}
-    turgid_dic = {"type": "adjective", "word": "turgid"}
-    words = [torpid_dic, turbid_dic, turgid_dic]
+def test_qall_with_two_predicates(all_trials, trial_one):
+    expected = [trial_one]
 
-    expected = [turbid_dic, turgid_dic]
+    results = qfilter_all(all_trials,
+                          qall(item("survived") == True,
+                              item("date").contains("2003")))
 
-    actual = list(
-        qfilter(words,
-                Query("word", getter=get).contains("u"))
-    )
-
-    assert actual == expected
+    assert list(results) == expected
 
 
-def test_is():
-    class Thing:
-        pass
+def test_qall_with_three_predicates(all_trials, trial_three):
+    expected = [trial_three]
 
-    thing_one, thing_two = Thing(), Thing()
-    thing_one_data = {"id": 0, "thing": thing_one}
-    thing_two_data = {"id": 1, "thing": thing_two}
-    things_data = [thing_one_data, thing_two_data]
+    results = qfilter_all(all_trials,
+                          qall(item("survived") == False,
+                               item("drug") == "tolterodine tartrate",
+                               item("dose_mg") > 350))
 
-    actual = list(
-        qfilter(things_data,
-                Query("thing", getter=get)._is(thing_two))
-    )
-
-    assert len(actual) == 1
-    assert actual[0]["id"] == thing_two_data["id"]
+    assert list(results) == expected
 
 
-def test_is_not():
-    class Thing:
-        pass
+def test_qany_with_two_predicates(
+    all_trials, trial_one, trial_two, trial_three
+):
+    expected = [trial_one, trial_two, trial_three]
 
-    thing_one, thing_two = Thing(), Thing()
-    thing_one_data = {"id": 0, "thing": thing_one}
-    thing_two_data = {"id": 1, "thing": thing_two}
-    things_data = [thing_one_data, thing_two_data]
+    results = qfilter_all(all_trials,
+                          qany(item("survived") == True,
+                              item("date").contains("2003")))
 
-    actual = list(
-        qfilter(things_data,
-                Query("thing", getter=get)._is_not(thing_two))
-    )
+    assert list(results) == expected
 
-    assert len(actual) == 1
-    assert actual[0]["id"] == thing_one_data["id"]
+
+def test_qany_with_three_predicates(
+    all_trials, trial_two, trial_three, trial_four, trial_five
+):
+    expected = [trial_two, trial_three, trial_four, trial_five]
+
+    results = qfilter_all(all_trials,
+                          qany(item("survived") == False,
+                              item("drug") == "tolterodine tartrate",
+                              item("dose_mg") > 350))
+
+    assert list(results) == expected
+
+
+def test_qnot(all_trials, trial_one, trial_two):
+    expected = [trial_one, trial_two]
+
+    results = qfilter_all(all_trials,
+                          qnot(item("survived") == False))
+
+    assert list(results) == expected
+
+
+def test_qnot_with_qany_and_two_predicates(all_trials, trial_four, trial_five):
+    expected = [trial_four, trial_five]
+
+    results = qfilter_all(all_trials,
+                          qnot(qany(item("survived") == True,
+                                   item("date").contains("2003"))))
+
+    assert list(results) == expected
+
+
+def test_qnot_with_qany_and_three_predicates(all_trials, trial_one):
+    expected = [trial_one]
+
+    results = qfilter_all(all_trials,
+                          qnot(qany(item("survived") == False,
+                                   item("drug") == "tolterodine tartrate",
+                                   item("dose_mg") > 350)))
+
+    assert list(results) == expected
+
+
+def test_qnot_with_qall(
+    all_trials, trial_one, trial_two, trial_four, trial_five
+):
+    expected = [trial_one, trial_two, trial_four, trial_five]
+
+    results = qfilter_all(all_trials,
+                          qnot(qall(item("date").contains("2003"),
+                                    item("dose_mg") > 400)))
+
+    assert list(results) == expected
