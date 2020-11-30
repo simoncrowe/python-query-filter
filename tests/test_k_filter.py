@@ -3,7 +3,12 @@ from operator import getitem
 
 import pytest
 
-from query_filter.filter import k_filter_all, split_key
+from query_filter.filter import (
+    k_filter_all,
+    k_filter_any,
+    k_filter_not_any,
+    split_key
+)
 
 
 @pytest.fixture
@@ -97,49 +102,47 @@ def test_split_key_produces_expected_results(key, expected):
 
 
 def test_filter_keyword_arg(users, user_one, user_four):
-    expected = (user_one, user_four)
+    expected = [user_one, user_four]
 
-    results = tuple(k_filter_all(users, get, gender="Female"))
+    results = k_filter_all(users, get, gender="Female")
 
-    assert results == expected
-
-
-def test_filter_keyword_args(users, user_four):
-    expected = (user_four,)
-
-    results = tuple(
-        k_filter_all(users, get, gender="Female", last_name="Philipeaux")
-    )
-
-    assert results == expected
+    assert list(results) == expected
 
 
-def test_filter_keyword_args_empty_results(users):
-    expected = tuple()
+def test_k_filter_all_two_args(users, user_four):
+    expected = [user_four]
 
-    results = tuple(
-        k_filter_all(users, get,
-                     gender="Female",
-                     last_name="Philipeaux",
-                     email="gcristou4@si.edu")
-    )
+    results = k_filter_all(users, get,
+                           gender="Female",
+                           last_name="Philipeaux")
 
-    assert results == expected
+    assert list(results) == expected
 
 
-def test_predicate_arg(users, user_two, user_four):
-    expected = (user_two, user_four)
+def test_k_filter_all_empty_results(users):
+    expected = []
+
+    results = k_filter_all(users, get,
+                           gender="Female",
+                           last_name="Philipeaux",
+                           email="gcristou4@si.edu")
+
+    assert list(results) == expected
+
+
+def test_k_filter_all_custom_predicate_arg(users, user_two, user_four):
+    expected = [user_two, user_four]
 
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(k_filter_all(users, get, id_is_even))
+    results = k_filter_all(users, get, id_is_even)
 
-    assert results == expected
+    assert list(results) == expected
 
 
 def test_predicate_args(users, user_one):
-    expected = (user_one,)
+    expected = [user_one]
 
     def id_is_odd(item):
         return item["id"] % 2 == 1
@@ -147,17 +150,43 @@ def test_predicate_args(users, user_one):
     def email_is_dot_com(item):
         return item["email"].endswith(".com")
 
-    results = tuple(k_filter_all(users, get, id_is_odd, email_is_dot_com))
+    results = k_filter_all(users, get, id_is_odd, email_is_dot_com)
 
-    assert results == expected
+    assert list(results) == expected
 
 
-def test_predicate_arg_with_keyword_arg(users, user_two):
-    expected = (user_two,)
+def test_k_filter_all_predicate_arg_with_keyword_arg(users, user_two):
+    expected = [user_two]
 
     def id_is_even(item):
         return item["id"] % 2 == 0
 
-    results = tuple(k_filter_all(users, get, id_is_even, gender="Male"))
+    results = k_filter_all(users, get, id_is_even, gender="Male")
 
-    assert results == expected
+    assert list(results) == expected
+
+
+def test_k_filter_any_prediocate_arg_with_keyword_arg(
+    users, user_one, user_two, user_four
+):
+    expected = [user_one, user_two, user_four]
+
+    def id_is_even(item):
+        return item["id"] % 2 == 0
+
+    results = k_filter_any(users, get, id_is_even, gender="Female")
+
+    assert list(results) == expected
+
+
+def test_k_filter_not_any_prediocate_arg_with_keyword_arg(
+    users, user_three, user_five
+):
+    expected = [user_three, user_five]
+
+    def id_is_even(item):
+        return item["id"] % 2 == 0
+
+    results = k_filter_not_any(users, get, id_is_even, gender="Female")
+
+    assert list(results) == expected
