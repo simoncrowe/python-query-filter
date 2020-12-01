@@ -145,7 +145,7 @@ def test_qfilter_not__any_with_three_predicates(all_trials, trial_one):
     assert list(results) == expected
 
 
-def test_qall_with_two_predicates(all_trials, trial_one):
+def test_all_with_two_predicates(all_trials, trial_one):
     expected = [trial_one]
 
     results = q_filter_all(all_trials,
@@ -155,7 +155,7 @@ def test_qall_with_two_predicates(all_trials, trial_one):
     assert list(results) == expected
 
 
-def test_qall_with_three_predicates(all_trials, trial_three):
+def test_all_with_three_predicates(all_trials, trial_three):
     expected = [trial_three]
 
     results = q_filter_all(all_trials,
@@ -166,7 +166,7 @@ def test_qall_with_three_predicates(all_trials, trial_three):
     assert list(results) == expected
 
 
-def test_qany_with_two_predicates(
+def test_any_with_two_predicates(
     all_trials, trial_one, trial_two, trial_three
 ):
     expected = [trial_one, trial_two, trial_three]
@@ -178,7 +178,7 @@ def test_qany_with_two_predicates(
     assert list(results) == expected
 
 
-def test_qany_with_three_predicates(
+def test_any_with_three_predicates(
     all_trials, trial_two, trial_three, trial_four, trial_five
 ):
     expected = [trial_two, trial_three, trial_four, trial_five]
@@ -191,7 +191,7 @@ def test_qany_with_three_predicates(
     assert list(results) == expected
 
 
-def test_qnot(all_trials, trial_one, trial_two):
+def test_not(all_trials, trial_one, trial_two):
     expected = [trial_one, trial_two]
 
     results = q_filter_all(all_trials,
@@ -200,7 +200,7 @@ def test_qnot(all_trials, trial_one, trial_two):
     assert list(results) == expected
 
 
-def test_qnot_with_qany_and_two_predicates(all_trials, trial_four, trial_five):
+def test_not_with_any_and_two_predicates(all_trials, trial_four, trial_five):
     expected = [trial_four, trial_five]
 
     results = q_filter_all(all_trials,
@@ -210,7 +210,7 @@ def test_qnot_with_qany_and_two_predicates(all_trials, trial_four, trial_five):
     assert list(results) == expected
 
 
-def test_qnot_with_qany_and_three_predicates(all_trials, trial_one):
+def test_not_with_any_and_three_predicates(all_trials, trial_one):
     expected = [trial_one]
 
     results = q_filter_all(
@@ -227,7 +227,7 @@ def test_qnot_with_qany_and_three_predicates(all_trials, trial_one):
     assert list(results) == expected
 
 
-def test_qnot_with_qall(
+def test_not_with_all(
     all_trials, trial_one, trial_two, trial_four, trial_five
 ):
     expected = [trial_one, trial_two, trial_four, trial_five]

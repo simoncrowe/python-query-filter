@@ -1,7 +1,6 @@
 from functools import reduce
-from itertools import chain, starmap
 from operator import getitem
-from typing import Any, Callable, Hashable, Iterable, Mapping
+from typing import Any, Callable, Hashable, Iterable, Iterator, Mapping
 
 from query_filter import predicate
 
@@ -106,7 +105,7 @@ def q_item(*keys: Hashable):
     return Query(*keys, getter=retrieve_item)
 
 
-_filter_preds = {
+_pred_makers = {
     "lt": predicate.lt,
     "lte": predicate.lte,
     "eq": predicate.eq,
@@ -123,7 +122,7 @@ _filter_preds = {
 def split_key(key: str):
     *keys, operation_name = key.split("__")
 
-    if operation_name not in _filter_preds:
+    if operation_name not in _pred_makers:
         keys.append(operation_name)
         operation_name = "eq"
 
@@ -136,53 +135,36 @@ def split_key(key: str):
     return keys, operation_name
 
 
-def _kpredicate(key: str, value: Any, getter: Callable):
-    keys, operation_name = split_key(key)
-    filter_pred = _filter_preds[operation_name]
-    return filter_pred(value, getter, keys)
+def _kwarg_preds(kwargs: Mapping, getter: Callable) -> Iterator[Callable]:
+    for key, value in kwargs.items():
+        key_path, operation_name = split_key(key)
+        filter_pred = _pred_makers[operation_name]
+        yield filter_pred(value, getter, key_path)
 
 
-def k_filter_any(items: Iterable, getter: Callable, *preds, **kwargs):
-    args = ((key, value, getter) for key, value in kwargs.items())
-    kpreds = starmap(_kpredicate, args)
-    return q_filter_any(items, *chain(preds, kpreds))
+def k_attrs_all(**kwargs) -> Callable:
+    return q_all(*_kwarg_preds(kwargs, retrieve_attr))
 
 
-def k_item_filter_any(items: Iterable, *preds, **kwargs):
-    return k_filter_any(items, retrieve_item, *preds, **kwargs)
+def k_attrs_any(**kwargs) -> Callable:
+    return q_any(*_kwarg_preds(kwargs, retrieve_attr))
 
 
-def k_attr_filter_any(items: Iterable, *preds, **kwargs):
-    return k_filter_any(items, retrieve_attr, *preds, **kwargs)
+def k_attrs_not_any(**kwargs) -> Callable:
+    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_attr)))
 
 
-def k_filter_all(items: Iterable, getter: Callable, *preds, **kwargs):
-    args = ((key, value, getter) for key, value in kwargs.items())
-    kpreds = starmap(_kpredicate, args)
-    return q_filter_all(items, *chain(preds, kpreds))
+def k_items_all(**kwargs) -> Callable:
+    return q_all(*_kwarg_preds(kwargs, retrieve_item))
 
 
-def k_item_filter_all(items: Iterable, *preds, **kwargs):
-    return k_filter_all(items, retrieve_item, *preds, **kwargs)
+def k_items_any(**kwargs) -> Callable:
+    return q_any(*_kwarg_preds(kwargs, retrieve_item))
 
 
-def k_attr_filter_all(items: Iterable, *preds, **kwargs):
-    return k_filter_all(items, retrieve_attr, *preds, **kwargs)
+def k_items_not_any(getter: Callable, **kwargs) -> Callable:
+    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_item)))
 
 
-def k_filter_not_any(items: Iterable, getter: Callable, *preds, **kwargs):
-    args = ((key, value, getter) for key, value in kwargs.items())
-    kpreds = starmap(_kpredicate, args)
-    return q_filter_not_any(items, *chain(preds, kpreds))
-
-
-def k_item_filter_not_any(items: Iterable, *preds, **kwargs):
-    return k_filter_not_any(items, retrieve_item, *preds, **kwargs)
-
-
-def k_attr_filter_not_any(items: Iterable, *preds, **kwargs):
-    return k_filter_not_any(items, retrieve_attr, *preds, **kwargs)
-
-
-k_attr_filter = k_attr_filter_all
-k_item_filter = k_item_filter_all
+k_attrs = k_attrs_all
+k_items = k_items_all
