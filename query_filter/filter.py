@@ -1,4 +1,4 @@
-from typing import Any, Callable, Hashable, Iterable, Iterator, Mapping
+from typing import Any, Callable, Iterable
 
 
 def q_filter_any(items: Iterable, *preds) -> Iterable[Any]:

@@ -1,12 +1,7 @@
 import pytest
 
 from query_filter.filter import q_filter_all, q_filter_any, q_filter_not_any
-from query_filter.query import (
-    k_items_all,
-    k_items_any,
-    k_items_not_any,
-    q_item,
-)
+from query_filter.query import q_item
 
 
 @pytest.fixture
@@ -89,7 +84,7 @@ def test_q_filter_not_any_prediocate_arg_with_keyword_arg(
         return item["id"] % 2 == 0
 
     results = q_filter_not_any(users,
-                               k_items_all(gender="Female"),
+                               q_item("gender") == "Female",
                                id_is_even)
 
     assert list(results) == expected
@@ -103,7 +98,7 @@ def test_k_filter_all_predicate_arg_with_keyword_arg(users, user_two):
 
     results = q_filter_all(users,
                            id_is_even,
-                           k_items_all(gender="Male"))
+                           q_item("gender") == "Male")
 
     assert list(results) == expected
 
@@ -118,6 +113,6 @@ def test_filter_any_prediocate_arg_with_keyword_arg(
 
     results = q_filter_any(users,
                            id_is_even,
-                           k_items_all(gender="Female"))
+                           q_item("gender") == "Female")
 
     assert list(results) == expected

@@ -1,7 +1,7 @@
 from functools import reduce
 from operator import getitem
 import re
-from typing import Any, Callable, Hashable, Iterable, Iterator,Mapping
+from typing import Any, Callable, Hashable, Iterable, Iterator, Mapping
 
 from query_filter.filter import q_all, q_any, q_not
 
@@ -135,7 +135,6 @@ def eq(obj: Any, criteria: Any):
     return obj == criteria
 
 
-
 @query_criteria
 def ne(obj: Any, criteria: Any):
     return obj != criteria
@@ -174,6 +173,7 @@ def _is_not(obj: Any, criteria: Any):
 @query_criteria
 def regex(obj: str or bytes, pattern: str or bytes):
     return bool(re.search(pattern, obj))
+
 
 @query_predicate
 def is_none(obj: Any):
@@ -220,41 +220,71 @@ def split_key(key: str):
     if not keys or not all(bool(key) for key in keys):
         raise ValueError(
             "No part of the key-path may be an empty string. e.g. "
-            "These are not allowed: '__bar_eq', 'foo__bar__', ''"
+            "These are not allowed: '__bar__eq', 'foo__bar__', ''"
         )
 
     return keys, operation_name
 
 
-def _kwarg_preds(kwargs: Mapping, getter: Callable) -> Iterator[Callable]:
+def split_attr_key(key: str):
+    if "__" in key:
+        key, operation_name = key.split("__")
+    else:
+        operation_name = "eq"
+
+    if operation_name not in _query_map:
+        raise ValueError(
+            f"'{operation_name}' is not a valid opration. "
+            f"Options are {', '.join(_query_map.keys())}"
+        )
+
+    keys = key.split(".")
+
+    if not keys or not all(bool(key) for key in keys):
+        raise ValueError(
+            "No part of the key-path may be an empty string. e.g. "
+            "These are not allowed: '.bar__eq', 'foo.bar.', ''"
+        )
+
+    return keys, operation_name
+
+
+def _kwarg_preds_items(kwargs: Mapping) -> Iterator[Callable]:
     for key, value in kwargs.items():
         key_path, operation_name = split_key(key)
         filter_pred = _query_map[operation_name]
-        yield filter_pred(getter, key_path, value)
+        yield filter_pred(retrieve_item, key_path, value)
+
+
+def _kwarg_preds_attrs(kwargs: Mapping) -> Iterator[Callable]:
+    for key, value in kwargs.items():
+        key_path, operation_name = split_attr_key(key)
+        filter_pred = _query_map[operation_name]
+        yield filter_pred(retrieve_attr, key_path, value)
 
 
 def k_attrs_all(**kwargs) -> Callable:
-    return q_all(*_kwarg_preds(kwargs, retrieve_attr))
+    return q_all(*_kwarg_preds_attrs(kwargs))
 
 
 def k_attrs_any(**kwargs) -> Callable:
-    return q_any(*_kwarg_preds(kwargs, retrieve_attr))
+    return q_any(*_kwarg_preds_attrs(kwargs))
 
 
 def k_attrs_not_any(**kwargs) -> Callable:
-    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_attr)))
+    return q_not(q_any(*_kwarg_preds_attrs(kwargs)))
 
 
 def k_items_all(**kwargs) -> Callable:
-    return q_all(*_kwarg_preds(kwargs, retrieve_item))
+    return q_all(*_kwarg_preds_items(kwargs))
 
 
 def k_items_any(**kwargs) -> Callable:
-    return q_any(*_kwarg_preds(kwargs, retrieve_item))
+    return q_any(*_kwarg_preds_items(kwargs))
 
 
-def k_items_not_any(getter: Callable, **kwargs) -> Callable:
-    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_item)))
+def k_items_not_any(**kwargs) -> Callable:
+    return q_not(q_any(*_kwarg_preds_items(kwargs)))
 
 
 k_attrs = k_attrs_all

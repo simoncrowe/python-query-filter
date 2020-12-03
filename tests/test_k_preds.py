@@ -11,62 +11,106 @@ from query_filter.query import (
     k_items_all,
     k_items_any,
     k_items_not_any,
+    split_attr_key,
     split_key,
 )
 
+
+class User:
+    def __init__(self, first_name: str, last_name: str,
+                 email: str, gender: str, email_confirmed: bool):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.gender = gender
+        self.email_confirmed = email_confirmed
+
+
 @pytest.fixture
-def user_one():
+def user_one_data():
     return {
-        "id": 1,
         "first_name": "Breanne",
         "last_name": "Janosevic",
         "email": "bjanosevic0@sitemeter.com",
         "gender": "Female",
+        "email_confirmed": False,
     }
 
 
 @pytest.fixture
-def user_two():
+def user_one(user_one_data):
+    return User(**user_one_data)
+
+
+@pytest.fixture
+def user_two_data():
     return {
-        "id": 2,
         "first_name": "Valle",
         "last_name": "Ginman",
         "email": "vginman1@cisco.com",
         "gender": "Male",
+        "email_confirmed": False,
     }
 
 
 @pytest.fixture
-def user_three():
+def user_two(user_two_data):
+    return User(**user_two_data)
+
+
+@pytest.fixture
+def user_three_data():
     return {
-        "id": 3,
         "first_name": "Galven",
         "last_name": "Henriet",
         "email": "ghenriet2@un.org",
         "gender": "Male",
+        "email_confirmed": True,
     }
 
 
 @pytest.fixture
-def user_four():
+def user_three(user_three_data):
+    return User(**user_three_data)
+
+
+@pytest.fixture
+def user_four_data():
     return {
-        "id": 4,
         "first_name": "Krystalle",
         "last_name": "Philipeaux",
         "email": "kphilipeaux3@macromedia.com",
         "gender": "Female",
+        "email_confirmed": False,
     }
 
 
 @pytest.fixture
-def user_five():
+def user_four(user_four_data):
+    return User(**user_four_data)
+
+
+@pytest.fixture
+def user_five_data():
     return {
-        "id": 5,
         "first_name": "Giordano",
         "last_name": "Cristou",
         "email": "gcristou4@si.edu",
         "gender": "Male",
+        "email_confirmed": True,
     }
+
+
+@pytest.fixture
+def user_five(user_five_data):
+    return User(**user_five_data)
+
+
+@pytest.fixture
+def users_data(user_one_data, user_two_data, user_three_data,
+               user_four_data, user_five_data):
+    return (user_one_data, user_two_data, user_three_data,
+            user_four_data, user_five_data)
 
 
 @pytest.fixture
@@ -81,9 +125,35 @@ def get(obj, *keys):
 
 @pytest.mark.parametrize(
     "key",
-    ["__", "___", "_____ ", "__lt", "a__", "a__b__", "__a__gt"]
+    ["__", "___", "a__lick", "__lt", "a__", "a.b__", ".b", ".a__gt", "."]
 )
 def test_split_key_fails_if_not_formatted_correctly(key):
+    with pytest.raises(ValueError):
+        split_attr_key(key)
+
+
+@pytest.mark.parametrize(
+    "key,expected",
+    [
+        ("a", (["a"], "eq")),
+        ("a.b", (["a", "b"], "eq")),
+        ("a.b.c", (["a", "b", "c"], "eq")),
+        ("a.gte", (["a", "gte"], "eq")),
+        ("a__regex", (["a"], "regex")),
+        ("a.b__contains", (["a", "b"], "contains")),
+        ("a.b.c__is", (["a", "b", "c"], "is")),
+    ]
+)
+def test_split_attr_key_produces_expected_results(key, expected):
+    result = split_attr_key(key)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "key",
+    ["__", "___", "_____ ", "__lt", "a__", "a__b__", "__a__gt"]
+)
+def test_split_attr_key_fails_if_not_formatted_correctly(key):
     with pytest.raises(ValueError):
         split_key(key)
 
@@ -104,30 +174,83 @@ def test_split_key_produces_expected_results(key, expected):
     assert result == expected
 
 
-def test_k_items_all(users, user_one, user_four):
-    expected = [user_one, user_four]
+def test_k_items_all(users_data, user_one_data, user_four_data):
+    expected = [user_one_data, user_four_data]
 
-    results = q_filter(users, k_items_all(gender="Female"))
+    results = q_filter(users_data, k_items_all(gender="Female"))
 
     assert list(results) == expected
 
 
-def test_k_items_all_two_args(users, user_four):
-    expected = [user_four]
+def test_k_items_all_two_args(users_data, user_four_data):
+    expected = [user_four_data]
 
-    results = q_filter(users,
+    results = q_filter(users_data,
                        k_items_all(gender="Female",
                                    last_name="Philipeaux"))
 
     assert list(results) == expected
 
 
-def test_k_items_all_empty_results(users):
+def test_k_items_all_empty_results(users_data):
     expected = []
 
-    results = q_filter(users,
+    results = q_filter(users_data,
                        k_items_all(gender="Female",
                                    last_name="Philipeaux",
                                    email="gcristou4@si.edu"))
+
+    assert list(results) == expected
+
+
+def test_k_items_any(users_data, user_one_data,
+                     user_two_data, user_four_data):
+
+    expected = [user_one_data, user_two_data, user_four_data]
+
+    results = q_filter(users_data,
+                       k_items_any(gender="Female",
+                                   email_confirmed__is=False))
+
+    assert list(results) == expected
+
+
+def test_k_items_not_any(users_data, user_three_data, user_five_data):
+
+    expected = [user_three_data, user_five_data]
+
+    results = q_filter(users_data,
+                       k_items_not_any(gender="Female",
+                                       email_confirmed__is=False))
+
+    assert list(results) == expected
+
+
+def test_k_attrs_all(users, user_one, user_two, user_four):
+    expected = [user_one, user_two, user_four]
+
+    results = q_filter(users, k_attrs_all(email__regex=r"\.com"))
+
+    assert list(results) == expected
+
+
+def test_k_attrs_any(users, user_one, user_three, user_four, user_five):
+
+    expected = [user_one, user_three, user_four, user_five]
+
+    results = q_filter(users,
+                       k_attrs_any(gender="Female",
+                                   email_confirmed__is=True))
+
+    assert list(results) == expected
+
+
+def test_k_attrs_not_any(users, user_two):
+
+    expected = [user_two]
+
+    results = q_filter(users,
+                       k_attrs_not_any(gender="Female",
+                                       email_confirmed__is=True))
 
     assert list(results) == expected
