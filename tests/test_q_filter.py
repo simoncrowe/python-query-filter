@@ -1,7 +1,6 @@
 import pytest
 
 from query_filter.filter import (
-    q_item,
     q_all,
     q_any,
     q_filter_all,
@@ -9,6 +8,7 @@ from query_filter.filter import (
     q_filter_not_any,
     q_not,
 )
+from query_filter.query import q_item
 
 
 @pytest.fixture
@@ -76,69 +76,69 @@ def all_trials(trial_one, trial_two, trial_three, trial_four, trial_five):
     return [trial_one, trial_two, trial_three, trial_four, trial_five]
 
 
-def test_qfilter_all_with_two_predicates(all_trials, trial_one):
+def test_q_filter_all_with_two_predicates(all_trials, trial_one):
     expected = [trial_one]
 
     results = q_filter_all(all_trials,
-                           q_item("survived")._is(True),
+                           q_item("survived").is_true(),
                            q_item("date").contains("2003"))
 
     assert list(results) == expected
 
 
-def test_qfilter_all_with_three_predicates(all_trials, trial_three):
+def test_q_filter_all_with_three_predicates(all_trials, trial_three):
     expected = [trial_three]
 
     results = q_filter_all(all_trials,
-                           q_item("survived")._is(False),
+                           q_item("survived").is_false(),
                            q_item("drug") == "tolterodine tartrate",
                            q_item("dose_mg") > 350)
 
     assert list(results) == expected
 
 
-def test_qfilter_any_with_two_predicates(
+def test_q_filter_any_with_two_predicates(
     all_trials, trial_one, trial_two, trial_three
 ):
     expected = [trial_one, trial_two, trial_three]
 
     results = q_filter_any(all_trials,
-                           q_item("survived")._is(True),
+                           q_item("survived").is_true(),
                            q_item("date").contains("2003"))
 
     assert list(results) == expected
 
 
-def test_qfilter_any_with_three_predicates(
+def test_q_filter_any_with_three_predicates(
     all_trials, trial_two, trial_three, trial_four, trial_five
 ):
     expected = [trial_two, trial_three, trial_four, trial_five]
 
     results = q_filter_any(all_trials,
-                           q_item("survived")._is(False),
+                           q_item("survived").is_false(),
                            q_item("drug") == "tolterodine tartrate",
                            q_item("dose_mg") > 350)
 
     assert list(results) == expected
 
 
-def test_qfilter_not_any_with_two_predicates(
+def test_q_filter_not_any_with_two_predicates(
     all_trials, trial_four, trial_five
 ):
     expected = [trial_four, trial_five]
 
     results = q_filter_not_any(all_trials,
-                               q_item("survived")._is(True),
+                               q_item("survived").is_true(),
                                q_item("date").contains("2003"))
 
     assert list(results) == expected
 
 
-def test_qfilter_not__any_with_three_predicates(all_trials, trial_one):
+def test_q_filter_not__any_with_three_predicates(all_trials, trial_one):
     expected = [trial_one]
 
     results = q_filter_not_any(all_trials,
-                               q_item("survived")._is(False),
+                               q_item("survived").is_false(),
                                q_item("drug") == "tolterodine tartrate",
                                q_item("dose_mg") > 350)
 
@@ -149,7 +149,7 @@ def test_all_with_two_predicates(all_trials, trial_one):
     expected = [trial_one]
 
     results = q_filter_all(all_trials,
-                           q_all(q_item("survived")._is(True),
+                           q_all(q_item("survived").is_true(),
                                  q_item("date").contains("2003")))
 
     assert list(results) == expected
@@ -159,7 +159,7 @@ def test_all_with_three_predicates(all_trials, trial_three):
     expected = [trial_three]
 
     results = q_filter_all(all_trials,
-                           q_all(q_item("survived")._is(False),
+                           q_all(q_item("survived").is_false(),
                                  q_item("drug") == "tolterodine tartrate",
                                  q_item("dose_mg") > 350))
 
@@ -172,7 +172,7 @@ def test_any_with_two_predicates(
     expected = [trial_one, trial_two, trial_three]
 
     results = q_filter_all(all_trials,
-                           q_any(q_item("survived")._is(True),
+                           q_any(q_item("survived").is_true(),
                                  q_item("date").contains("2003")))
 
     assert list(results) == expected
@@ -184,7 +184,7 @@ def test_any_with_three_predicates(
     expected = [trial_two, trial_three, trial_four, trial_five]
 
     results = q_filter_all(all_trials,
-                           q_any(q_item("survived")._is(False),
+                           q_any(q_item("survived").is_false(),
                                  q_item("drug") == "tolterodine tartrate",
                                  q_item("dose_mg") > 350))
 
@@ -195,7 +195,7 @@ def test_not(all_trials, trial_one, trial_two):
     expected = [trial_one, trial_two]
 
     results = q_filter_all(all_trials,
-                           q_not(q_item("survived")._is(False)))
+                           q_not(q_item("survived").is_false()))
 
     assert list(results) == expected
 
@@ -204,7 +204,7 @@ def test_not_with_any_and_two_predicates(all_trials, trial_four, trial_five):
     expected = [trial_four, trial_five]
 
     results = q_filter_all(all_trials,
-                           q_not(q_any(q_item("survived")._is(True),
+                           q_not(q_any(q_item("survived").is_true(),
                                        q_item("date").contains("2003"))))
 
     assert list(results) == expected
@@ -217,7 +217,7 @@ def test_not_with_any_and_three_predicates(all_trials, trial_one):
         all_trials,
         q_not(
             q_any(
-                q_item("survived")._is(False),
+                q_item("survived").is_false(),
                 q_item("drug") == "tolterodine tartrate",
                 q_item("dose_mg") > 350
             )

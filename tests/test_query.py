@@ -3,7 +3,8 @@ from operator import getitem
 
 import pytest
 
-from query_filter.filter import q_filter, Query
+from query_filter.filter import q_filter
+from query_filter.query import Query
 
 
 @pytest.fixture
@@ -139,17 +140,11 @@ def test_is_in_list(addresses, address_one, address_five):
 def test_is_in_string(addresses, address_one, address_two):
     expected = [address_one, address_two]
 
-    actual = list(
-        q_filter(
-            addresses,
-            Query(
-                "post_code",
-                getter=get
-            ).is_in("92415-241024-01152")
-        )
+    results = q_filter(
+        addresses, Query("post_code", getter=get).is_in("92415-241024-01152")
     )
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_list_contains():
@@ -160,12 +155,9 @@ def test_list_contains():
 
     expected = [primes, even]
 
-    actual = list(
-        q_filter(sequences,
-                 Query("numbers", getter=get).contains(2))
-    )
+    results = q_filter(sequences, Query("numbers", getter=get).contains(2))
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_string_contains():
@@ -184,37 +176,45 @@ def test_string_contains():
     assert actual == expected
 
 
-def test_is():
-    class Thing:
-        pass
+def test_is_none():
+    datum_one = {"id": 0, "value": 42}
+    datum_two = {"id": 1, "value": None}
+    data = [datum_one, datum_two]
+    expected = [datum_two]
 
-    thing_one, thing_two = Thing(), Thing()
-    thing_one_data = {"id": 0, "thing": thing_one}
-    thing_two_data = {"id": 1, "thing": thing_two}
-    things_data = [thing_one_data, thing_two_data]
+    results = q_filter(data, Query("value", getter=get).is_none())
 
-    actual = list(
-        q_filter(things_data,
-                 Query("thing", getter=get)._is(thing_two))
-    )
-
-    assert len(actual) == 1
-    assert actual[0]["id"] == thing_two_data["id"]
+    assert list(results) == expected
 
 
-def test_is_not():
-    class Thing:
-        pass
+def test_is_not_none():
+    datum_one = {"id": 0, "value": 42}
+    datum_two = {"id": 1, "value": None}
+    data = [datum_one, datum_two]
+    expected = [datum_one]
 
-    thing_one, thing_two = Thing(), Thing()
-    thing_one_data = {"id": 0, "thing": thing_one}
-    thing_two_data = {"id": 1, "thing": thing_two}
-    things_data = [thing_one_data, thing_two_data]
+    results = q_filter(data, Query("value", getter=get).is_not_none())
 
-    actual = list(
-        q_filter(things_data,
-                 Query("thing", getter=get)._is_not(thing_two))
-    )
+    assert list(results) == expected
 
-    assert len(actual) == 1
-    assert actual[0]["id"] == thing_one_data["id"]
+
+def test_is_true():
+    datum_one = {"id": 0, "value": False}
+    datum_two = {"id": 1, "value": True}
+    data = [datum_one, datum_two]
+    expected = [datum_two]
+
+    results = q_filter(data, Query("value", getter=get).is_true())
+
+    assert list(results) == expected
+
+
+def test_is_false():
+    datum_one = {"id": 0, "value": False}
+    datum_two = {"id": 1, "value": True}
+    data = [datum_one, datum_two]
+    expected = [datum_one]
+
+    results = q_filter(data, Query("value", getter=get).is_false())
+
+    assert list(results) == expected

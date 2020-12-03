@@ -1,13 +1,11 @@
 import pytest
 
-from query_filter.filter import (
+from query_filter.filter import q_filter_all, q_filter_any, q_filter_not_any
+from query_filter.query import (
     k_items_all,
     k_items_any,
     k_items_not_any,
-    q_filter_all,
-    q_filter_any,
-    q_filter_not_any,
-    q_item
+    q_item,
 )
 
 

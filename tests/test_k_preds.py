@@ -3,7 +3,8 @@ from operator import getitem
 
 import pytest
 
-from query_filter.filter import (
+from query_filter.filter import q_filter
+from query_filter.query import (
     k_attrs_all,
     k_attrs_any,
     k_attrs_not_any,
@@ -11,9 +12,7 @@ from query_filter.filter import (
     k_items_any,
     k_items_not_any,
     split_key,
-    q_filter,
 )
-
 
 @pytest.fixture
 def user_one():
