@@ -218,3 +218,16 @@ def test_is_false():
     results = q_filter(data, Query("value", getter=get).is_false())
 
     assert list(results) == expected
+
+
+def test_regex():
+    datum_one = {"id": 0, "value": "03/12/2020"}
+    datum_two = {"id": 1, "value": "2020-12-03"}
+    data = [datum_one, datum_two]
+    expected = [datum_two]
+
+    results = q_filter(
+        data, Query("value", getter=get).regex("[0-9]{4}-[01][0-9]-[0-3][0-9]")
+    )
+
+    assert list(results) == expected

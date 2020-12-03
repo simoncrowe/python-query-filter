@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import getitem
-
+import re
 from typing import Any, Callable, Hashable, Iterable, Iterator,Mapping
 
 from query_filter.filter import q_all, q_any, q_not
@@ -29,11 +29,14 @@ class Query:
     def __ge__(self, criteria):
         return gte(self._getter, self._keys, criteria)
 
-    def is_in(self, criteria):
-        return is_in(self._getter, self._keys, criteria)
+    def is_in(self, container):
+        return is_in(self._getter, self._keys, container)
 
-    def contains(self, criteria):
-        return contains(self._getter, self._keys, criteria)
+    def contains(self, member):
+        return contains(self._getter, self._keys, member)
+
+    def regex(self, pattern):
+        return regex(self._getter, self._keys, pattern)
 
     def is_none(self):
         return is_none(self._getter, self._keys)
@@ -168,6 +171,10 @@ def _is_not(obj: Any, criteria: Any):
     return obj is not criteria
 
 
+@query_criteria
+def regex(obj: str or bytes, pattern: str or bytes):
+    return bool(re.search(pattern, obj))
+
 @query_predicate
 def is_none(obj: Any):
     return obj is None
@@ -197,6 +204,7 @@ _query_map = {
     "gte": gte,
     "in": is_in,
     "contains": contains,
+    "regex": regex,
     "is": _is,
     "is_not": _is_not,
 }

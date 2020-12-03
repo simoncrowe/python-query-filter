@@ -1,5 +1,3 @@
-from functools import reduce
-from operator import getitem
 from typing import Any, Callable, Hashable, Iterable, Iterator, Mapping
 
 
