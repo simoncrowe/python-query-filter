@@ -73,68 +73,63 @@ def get(obj, *keys):
 def test_equal(addresses, address_two, address_three, address_four):
     expected = [address_two, address_three, address_four]
 
-    actual = list(
-        q_filter(addresses,
-                 Query("state", getter=get) == "California")
-    )
+    results = q_filter(addresses,
+                       Query("state", getter=get) == "California")
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_not_equal(addresses, address_one, address_five):
     expected = [address_one, address_five]
 
-    actual = list(
-        q_filter(addresses,
-                 Query("state", getter=get) != "California")
-    )
+    results = q_filter(addresses,
+                       Query("state", getter=get) != "California")
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_less_than(addresses, address_one, address_two):
     expected = [address_one, address_two]
 
-    actual = list(q_filter(addresses, Query("id", getter=get) < 3))
+    results = q_filter(addresses, Query("id", getter=get) < 3)
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_less_than_or_equal(addresses, address_one,
                             address_two, address_three):
     expected = [address_one, address_two, address_three]
 
-    actual = list(q_filter(addresses, Query("id", getter=get) <= 3))
+    results = q_filter(addresses, Query("id", getter=get) <= 3)
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_greater_than(addresses, address_four, address_five):
     expected = [address_four, address_five]
 
-    actual = list(q_filter(addresses, Query("id", getter=get) > 3))
+    results = q_filter(addresses, Query("id", getter=get) > 3)
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_greater_than_or_equal(addresses, address_three,
                                address_four, address_five):
     expected = [address_three, address_four, address_five]
 
-    actual = list(q_filter(addresses, Query("id", getter=get) >= 3))
+    results = q_filter(addresses, Query("id", getter=get) >= 3)
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_is_in_list(addresses, address_one, address_five):
     expected = [address_one, address_five]
 
-    actual = list(
-        q_filter(addresses,
-                 Query("state", getter=get).is_in(["Texas", "Massachusetts"]))
+    results = q_filter(
+        addresses, Query("state", getter=get).is_in(["Texas", "Massachusetts"])
     )
 
-    assert actual == expected
+    assert list(results) == expected
 
 
 def test_is_in_string(addresses, address_one, address_two):
