@@ -105,7 +105,7 @@ def test_split_key_produces_expected_results(key, expected):
     assert result == expected
 
 
-def test_filter_keyword_arg(users, user_one, user_four):
+def test_k_items_all(users, user_one, user_four):
     expected = [user_one, user_four]
 
     results = q_filter(users, k_items_all(gender="Female"))
@@ -113,7 +113,7 @@ def test_filter_keyword_arg(users, user_one, user_four):
     assert list(results) == expected
 
 
-def test_q_filter_two_args(users, user_four):
+def test_k_items_all_two_args(users, user_four):
     expected = [user_four]
 
     results = q_filter(users,
@@ -123,7 +123,7 @@ def test_q_filter_two_args(users, user_four):
     assert list(results) == expected
 
 
-def test_q_filter_empty_results(users):
+def test_k_items_all_empty_results(users):
     expected = []
 
     results = q_filter(users,
