@@ -227,7 +227,6 @@ def test_regex():
     expected = [datum_two]
 
     results = q_filter(
-        data, Query("value", getter=get).regex("[0-9]{4}-[01][0-9]-[0-3][0-9]")
+        data, Query("value", getter=get).regex("[0-9]{4}-[0-9]{2}-[0-9]{2}")
     )
-
     assert list(results) == expected
