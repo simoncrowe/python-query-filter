@@ -221,7 +221,7 @@ def test_k_items_not_any(users_data, user_three_data, user_five_data):
 
     results = q_filter(users_data,
                        k_items_not_any(gender="Female",
-                                       email_confirmed__is=False))
+                                       email_confirmed__is_not=True))
 
     assert list(results) == expected
 
@@ -230,6 +230,17 @@ def test_k_attrs_all(users, user_one, user_two, user_four):
     expected = [user_one, user_two, user_four]
 
     results = q_filter(users, k_attrs_all(email__regex=r"\.com"))
+
+    assert list(results) == expected
+
+
+def test_k_attrs_all_not(users, user_two):
+    # Outcome should be same as q_not_any below
+    expected = [user_two]
+
+    results = q_filter(users,
+                       k_attrs_not_any(gender="Female",
+                                       email_confirmed__is=True))
 
     assert list(results) == expected
 
@@ -245,8 +256,18 @@ def test_k_attrs_any(users, user_one, user_three, user_four, user_five):
     assert list(results) == expected
 
 
-def test_k_attrs_not_any(users, user_two):
+def test_k_attrs_any_not(users, user_two):
 
+    expected = [user_two]
+
+    results = q_filter(users,
+                       k_attrs_not_any(gender="Female",
+                                       email_confirmed__is=True))
+
+    assert list(results) == expected
+
+
+def test_k_attrs_not_any(users, user_two):
     expected = [user_two]
 
     results = q_filter(users,
