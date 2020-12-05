@@ -228,15 +228,15 @@ is used to build a fictional ancestor chart.
     def __repr__(self):
         return (f"Node('{self.name}', mother={repr(self.mother)}, "
                 f"father={repr(self.father)})")
->>> root = Node(name='Tiya Meadows', 
-                mother=Node('Isobel Meadows (nee Walsh)', 
-                            mother=Node(name='Laura Walsh (nee Stanton)', 
-                                        mother=Node('Opal Eastwood (nee Plant)'),
-					father=Node('Alan Eastwood')), 
-			    father=Node(name='Jimmy Walsh')), 
-		father=Node(name='Isaac Meadows', 
-			    mother=Node('Halle Meadows (nee Perkins)'), 
-			    father=Node('Wilbur Meadows')))
+>>> Node(name='Tiya Meadows', 
+         mother=Node('Isobel Meadows (nee Walsh)', 
+                     mother=Node(name='Laura Walsh (nee Stanton)', 
+                                 mother=Node('Opal Eastwood (nee Plant)'),
+                                 father=Node('Alan Eastwood')), 
+                     father=Node(name='Jimmy Walsh')), 
+         father=Node(name='Isaac Meadows', 
+                     mother=Node('Halle Meadows (nee Perkins)'), 
+                     father=Node('Wilbur Meadows')))
 ```
 
 To demonstate the syntax, we can filter for the root node by their
@@ -251,13 +251,36 @@ great-great grandmother.
 [Node('Tiya Meadows', mother=Node('Isobel Meadows (nee Walsh)', mother=Node('Laura Walsh (nee Stanton)', mother=Node('Opal Eastwood (nee Plant)', mother=None, father=None), father=Node('Alan Eastwood', mother=None, father=None)), father=Node('Jimmy Walsh', mother=None, father=None)), father=Node('Isaac Meadows', mother=Node('Halle Meadows (nee Perkins)', mother=None, father=None), father=Node('Wilbur Meadows', mother=None, father=None)))]
 ```
 
+As attribures names can only be alphabetic characters, it's cleaner
+to deprate them with dots. 
+
+
 #### Using Django-style keyword arguments
 
+If you want to filter based on multiple attributes, you can pass the paths
+as keyword arguments to the `k_attrs` function. This query looks for nodes
+born with the surname Walsh that have a father node.
+
+```python
+>>> from query_filter import k_attrs, q_filter
+>>> results = q_filter(Node.instances,
+                       k_attrs(name__regex=r"Walsh(?! \(nee)",
+                               father__is_not=None))
+>>> list(results)
+[Node('Isobel Meadows (nee Walsh)', mother=Node('Laura Walsh (nee Stanton)', mother=Node('Opal Eastwood (nee Plant)', mother=None, father=None), father=Node('Alan Eastwood', mother=None, father=None)), father=Node('Jimmy Walsh', mother=None, father=None))]
+
+```
+
 NOTE: There is also a `k_items` function that can be used to filter dictinaries.
-It only works with string keys that contain no spaces or special characters.
-This is quite a limitation, considering that a dictionary key can be any 
-hashable object. It cannot filter lists or similar objects as it doesn't 
-cast the strings to integers.
+It only works with string keys. You can include special characters and spaces
+ by using `**`:
+```python
+k_items(**{"Cr4zy K3y!__ne": "sane"})
+```
+
+This restriction to strings is quite a limitation, considering that a dictionary 
+key can be any hashable object. `k_items` also cannot filter lists or similar objects 
+as it doesn't cast the double-underscore-delimited strings to integers.
 
 ### API
 
