@@ -1,4 +1,4 @@
-# python-query-filter
+## python-query-filter
 
 This package provides a functional API for filtering collections of
 heterogeneous, nested dictionaries or complex objects.
@@ -11,7 +11,7 @@ The remainder of the functions in this package
 are used to construct predicates that evaluate items
 or attributes within filtered objects.
 
-## Use Case
+### Use Case
 This package is best suited to nested, heterogenous data. Collections
 of flat homogenous dictionaries or objects are easier to filter with
 list comprehensions or generator expressions.
@@ -142,8 +142,8 @@ is (in my admittedly biased oppinion) a little less readible.
     )
 ```
 
-One reason for this is that the item `"AssociatePublicIpAddress"` is always
-present. The predicate returned by `is_true` above will silently return `False`
+One reason for this is that the item `"AssociatePublicIpAddress"` is sometimes
+missing. The predicate returned by `is_true` above will silently return `False`
 on missing keys, whereas with the generator expression we need to call `get`
 to avoid a `KeyError`. We're not even considering the case of an empty
 list for `"NetworkInterfaces"` here.
@@ -209,4 +209,68 @@ returning `True` if at least one of them is satisfied.
   'CreditSpecification': {'CpuCredits': 'standard'},
   'LaunchTemplateId': 'lt-aaa68831cce2a8d91',
   'VersionNumber': 5}]
+```
+
+#### Filtering by object attributes
+
+This can be useful if you're working with objects that have a lot
+of "has-a" relationships. For brevity, a hacky binary tree-like class
+is used to build a fictional ancestor chart.
+
+```python
+>>> class Node:
+    instances = []
+    def __init__(self, name, mother=None, father=None):
+        self.name = name
+        self.mother = mother
+        self.father = father
+        self.instances.append(self)
+    def __repr__(self):
+        return (f"Node('{self.name}', mother={repr(self.mother)}, "
+                f"father={repr(self.father)})")
+>>> root = Node(name='Tiya Meadows', 
+                mother=Node('Isobel Meadows (nee Walsh)', 
+                            mother=Node(name='Laura Walsh (nee Stanton)', 
+                                        mother=Node('Opal Eastwood (nee Plant)'),
+					father=Node('Alan Eastwood')), 
+			    father=Node(name='Jimmy Walsh')), 
+		father=Node(name='Isaac Meadows', 
+			    mother=Node('Halle Meadows (nee Perkins)'), 
+			    father=Node('Wilbur Meadows')))
+```
+
+To demonstate the syntax, we can filter for the root node by their
+great-great grandmother.
+
+```python
+>>> results = q_filter(
+        Node.instances,
+        q_attr("mother.mother.mother.name").contains("Opal Eastwood")
+    )
+>>> list(results)
+[Node('Tiya Meadows', mother=Node('Isobel Meadows (nee Walsh)', mother=Node('Laura Walsh (nee Stanton)', mother=Node('Opal Eastwood (nee Plant)', mother=None, father=None), father=Node('Alan Eastwood', mother=None, father=None)), father=Node('Jimmy Walsh', mother=None, father=None)), father=Node('Isaac Meadows', mother=Node('Halle Meadows (nee Perkins)', mother=None, father=None), father=Node('Wilbur Meadows', mother=None, father=None)))]
+```
+
+#### Using Django-style keyword arguments
+
+NOTE: There is also a `k_items` function that can be used to filter dictinaries.
+It only works with string keys that contain no spaces or special characters.
+This is quite a limitation, considering that a dictionary key can be any 
+hashable object. It cannot filter lists or similar objects as it doesn't 
+cast the strings to integers.
+
+### API
+
+#### Filter functions
+
+#### query functions
+
+### 100% test coverage
+
+To run tests and verify this:
+
+```sh
+pip install -r requirements/development.txt
+coverage run  --source "query_filter" -m pytest tests
+coverage report
 ```
