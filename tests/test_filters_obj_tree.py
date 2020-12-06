@@ -5,14 +5,17 @@ from query_filter import q_filter, q_attr, k_attrs
 
 class Node:
     instances = []
+
     def __init__(self, name, mother=None, father=None):
         self.name = name
         self.mother = mother
         self.father = father
         self.instances.append(self)
+
     def __repr__(self):
         return (f"Node('{self.name}', mother={repr(self.mother)}, "
                 f"father={repr(self.father)})")
+
 
 @pytest.fixture
 def p_grandfather():

@@ -1,25 +1,25 @@
 from typing import Any, Callable, Iterable
 
 
-def q_filter_any(items: Iterable, *preds) -> Iterable[Any]:
+def q_filter_any(objects: Iterable, *preds) -> Iterable[Any]:
     def main_predicate(item):
         return any(pred(item) for pred in preds)
 
-    return filter(main_predicate, items)
+    return filter(main_predicate, objects)
 
 
-def q_filter_not_any(items: Iterable, *preds) -> Iterable[Any]:
+def q_filter_not_any(objects: Iterable, *preds) -> Iterable[Any]:
     def main_predicate(item):
         return not any(pred(item) for pred in preds)
 
-    return filter(main_predicate, items)
+    return filter(main_predicate, objects)
 
 
-def q_filter_all(items: Iterable, *preds, copy=True) -> Iterable[Any]:
+def q_filter_all(objects: Iterable, *preds, copy=True) -> Iterable[Any]:
     def main_predicate(item):
         return all(pred(item) for pred in preds)
 
-    return filter(main_predicate, items)
+    return filter(main_predicate, objects)
 
 
 q_filter = q_filter_all

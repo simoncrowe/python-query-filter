@@ -11,43 +11,61 @@ class Query:
         self._keys = keys
         self._getter = getter
 
-    def __lt__(self, criteria):
-        return lt(self._getter, self._keys, criteria)
+    def lt(self, criterion: Any) -> Callable:
+        return lt(self._getter, self._keys, criterion)
 
-    def __le__(self, criteria):
-        return lte(self._getter, self._keys, criteria)
+    def __lt__(self, criterion: Any) -> Callable:
+        return self.lt(criterion)
 
-    def __eq__(self, criteria):
-        return eq(self._getter, self._keys, criteria)
+    def lte(self, criterion: Any) -> Callable:
+        return lte(self._getter, self._keys, criterion)
 
-    def __ne__(self, criteria):
-        return ne(self._getter, self._keys, criteria)
+    def __le__(self, criterion: Any) -> Callable:
+        return self.lte(criterion)
 
-    def __gt__(self, criteria):
-        return gt(self._getter, self._keys, criteria)
+    def eq(self, criterion: Any) -> Callable:
+        return eq(self._getter, self._keys, criterion)
 
-    def __ge__(self, criteria):
-        return gte(self._getter, self._keys, criteria)
+    def __eq__(self, criterion: Any) -> Callable:
+        return self.eq(criterion)
 
-    def is_in(self, container):
+    def ne(self, criterion: Any) -> Callable:
+        return ne(self._getter, self._keys, criterion)
+
+    def __ne__(self, criterion: Any) -> Callable:
+        return self.ne(criterion)
+
+    def gt(self, criterion: Any) -> Callable:
+        return gt(self._getter, self._keys, criterion)
+
+    def __gt__(self, criterion: Any) -> Callable:
+        return self.gt(criterion)
+
+    def gte(self, criterion: Any) -> Callable:
+        return gte(self._getter, self._keys, criterion)
+
+    def __ge__(self, criterion: Any) -> Callable:
+        return self.gte(criterion)
+
+    def is_in(self, container: Any) -> Callable:
         return is_in(self._getter, self._keys, container)
 
-    def contains(self, member):
+    def contains(self, member: Any) -> Callable:
         return contains(self._getter, self._keys, member)
 
-    def regex(self, pattern):
+    def regex(self, pattern: str) -> Callable:
         return regex(self._getter, self._keys, pattern)
 
-    def is_none(self):
+    def is_none(self) -> Callable:
         return is_none(self._getter, self._keys)
 
-    def is_not_none(self):
+    def is_not_none(self) -> Callable:
         return is_not_none(self._getter, self._keys)
 
-    def is_true(self):
+    def is_true(self) -> Callable:
         return is_true(self._getter, self._keys)
 
-    def is_false(self):
+    def is_false(self) -> Callable:
         return is_false(self._getter, self._keys)
 
 
@@ -62,7 +80,7 @@ def retrieve_attr(obj: Any, *names: str):
         raise ObjNotFound()
 
 
-def q_attr(path: str):
+def q_attr(path: str) -> Query:
     return Query(*path.split("."), getter=retrieve_attr)
 
 
@@ -73,7 +91,7 @@ def retrieve_item(obj: Mapping, *keys: Hashable):
         raise ObjNotFound()
 
 
-def q_item(*keys: Hashable):
+def q_item(*keys: Hashable) -> Query:
     return Query(*keys, getter=retrieve_item)
 
 
@@ -100,12 +118,12 @@ def query_predicate(predicate: Callable):
     return pred_maker
 
 
-def query_criteria(comparer: Callable):
+def query_criterion(comparer: Callable):
     """
     Like query_predicate, but decorates functions that evaluate an object
-    against some criteria.
+    against some criterion.
     """
-    def pred_maker(get: Callable, keys: Iterable[Any], *criteria: Any):
+    def pred_maker(get: Callable, keys: Iterable[Any], *criterion: Any):
 
         def pred(obj: Any):
             try:
@@ -113,64 +131,64 @@ def query_criteria(comparer: Callable):
             except ObjNotFound:
                 return False
 
-            return comparer(evaluated, *criteria)
+            return comparer(evaluated, *criterion)
 
         return pred
 
     return pred_maker
 
 
-@query_criteria
-def lt(evaluated: Any, criteria: Any):
-    return evaluated < criteria
+@query_criterion
+def lt(evaluated: Any, criterion: Any):
+    return evaluated < criterion
 
 
-@query_criteria
-def lte(obj: Any, criteria: Any):
-    return obj <= criteria
+@query_criterion
+def lte(obj: Any, criterion: Any):
+    return obj <= criterion
 
 
-@query_criteria
-def eq(obj: Any, criteria: Any):
-    return obj == criteria
+@query_criterion
+def eq(obj: Any, criterion: Any):
+    return obj == criterion
 
 
-@query_criteria
-def ne(obj: Any, criteria: Any):
-    return obj != criteria
+@query_criterion
+def ne(obj: Any, criterion: Any):
+    return obj != criterion
 
 
-@query_criteria
-def gt(obj: Any, criteria: Any):
-    return obj > criteria
+@query_criterion
+def gt(obj: Any, criterion: Any):
+    return obj > criterion
 
 
-@query_criteria
-def gte(obj: Any, criteria: Any):
-    return obj >= criteria
+@query_criterion
+def gte(obj: Any, criterion: Any):
+    return obj >= criterion
 
 
-@query_criteria
-def is_in(obj: Any, criteria: Any):
-    return obj in criteria
+@query_criterion
+def is_in(obj: Any, container: Any):
+    return obj in container
 
 
-@query_criteria
-def contains(obj: Any, criteria: Any):
-    return criteria in obj
+@query_criterion
+def contains(obj: Any, member: Any):
+    return member in obj
 
 
-@query_criteria
-def _is(obj: Any, criteria: Any):
-    return obj is criteria
+@query_criterion
+def _is(obj: Any, criterion: Any):
+    return obj is criterion
 
 
-@query_criteria
-def _is_not(obj: Any, criteria: Any):
-    return obj is not criteria
+@query_criterion
+def _is_not(obj: Any, criterion: Any):
+    return obj is not criterion
 
 
-@query_criteria
+@query_criterion
 def regex(obj: str or bytes, pattern: str or bytes):
     return bool(re.search(pattern, obj))
 
