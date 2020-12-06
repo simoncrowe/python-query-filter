@@ -289,45 +289,45 @@ as it doesn't cast the double-underscore-delimited strings to integers.
 
 #### Filter functions
 
-##### query_filter.q_filter
+##### query\_filter.q\_filter
 This is an alias for `query_filter.q_filter_all`.
 
-##### query_filter.q_filter_all(objects: Iterable, *preds, copy=True) -> Iterable[Any]
+##### query\_filter.q\_filter\_all(objects: Iterable, *preds, copy=True) -> Iterable[Any]
 Returns objects for which all of the predicates in `preds` are true.
 
-##### query_filter.q_filter_any(objects: Iterable, *preds) -> Iterable[Any]
+##### query\_filter.q\_filter\_any(objects: Iterable, *preds) -> Iterable[Any]
 Returns objects for which any of the predicates in `preds` are true.
 
-##### query_filter.q_filter_not_any(objects: Iterable, *preds) -> Iterable[Any]
+##### query\_filter.q\_filter\_not\_any(objects: Iterable, *preds) -> Iterable[Any]
 Returns objects for which none of the predicates in `preds` is true.
 
-##### query_filter.q_all(*preds: Callable) -> Callable
-Returns a predicate that returns `True` if all predicates 
+##### query\_filter.q\_all(*preds: Callable) -> Callable
+Returns a predicate that returns `True` if all predicates
 in `preds` return `True`.
 
-##### query_filter.q_any(*preds: Callable) -> Callable
-Returns a predicate that returns `True` if any predicates 
+##### query\_filter.q\_any(*preds: Callable) -> Callable
+Returns a predicate that returns `True` if any predicates
 in `preds` return `True`.
 
-##### query_filter.q_not(pred: Callable) -> Callable
+##### query\_filter.q\_not(pred: Callable) -> Callable
 Returns a predicate that returns `True` if the predicate `pred` returns `False`.
 
 #### query functions
-##### query_filter.q_attr(path: str) -> Query
-Returns a `Query` object for evaluating attributes 
+##### query\_filter.q\_attr(path: str) -> Query
+Returns a `Query` object for evaluating attributes
 indicated by the dot-delimited `path` argument.
 
 Query instances expose methods (magic and otherwise)
 for comparison etc. These methods return predicates.
 
-##### query_filter.q_item(\*keys: Hashable) -> Query
-Returns a `Query` object for evaluating items 
+##### query\_filter.q\_item(\*keys: Hashable) -> Query
+Returns a `Query` object for evaluating items
 indicated by one or more keys, passed as positional arguments.
 
-##### query_filter.k_attrs
+##### query\_filter.k\_attrs
 This is an alias of `query_filter.k_attrs_all`.
 
-##### query_filter.k_attrs_all(\*\*kwargs) -> Callable
+##### query\_filter.k\_attrs\_all(\*\*kwargs) -> Callable
 Returns a predicate that evaluates an object based on the
 
 #### Query methods
@@ -370,7 +370,7 @@ Returns a predicate that's true if the queried object is greater than or equal t
 ##### Query.\_\_ge\_\_(self, criterion: Any) -> Callable
 Same as `Query.gte`, Call using the `>=` operator.
 
-##### Query.is_in(self, container: Any) -> Callable
+##### Query.is\_in(self, container: Any) -> Callable
 Returns a predicate that's true if the queried object is the `container` argument.
 
 ##### Query.contains(self, member: Any) -> Callable
@@ -380,22 +380,22 @@ Returns a predicate that's true if the queried object contains the `member` argu
 Returns a predicate that's true if the queried object matches the regular expression
 `pattern` argument. This only works for strings and byte strings.
 
-##### Query.is_none(self) -> Callable
+##### Query.is\_none(self) -> Callable
 Returns a predicate that's true if the queried object is `None`.
 
-##### Query.is_not_none(self) -> Callable
+##### Query.is\_not\_none(self) -> Callable
 Returns a predicate that's true if the queried object is not `None`.
 
-##### Query.is_true(self) -> Callable
+##### Query.is\_true(self) -> Callable
 Returns a predicate that's true if the queried object is `True`.
 
-##### Query.is_false(self) -> Callable
+##### Query.is\_false(self) -> Callable
 Returns a predicate that's true if the queried object is `False`.
 
 #### "k_" function keyword arguemts
 Attribute names, keys and query names are separated by double-underscores. e.q `__`.
 
-The general form is simlar to the what's used in Django: 
+The general form is simlar to the what's used in Django:
 `(parent_attr__child_attr__query_name="Criteria for query")`.
 If the query name at the end is ommited, equality is assumed.
 `(parent_attr__child_attr=42)` is equivalent to `(parent_attr__child_attr__eq=42)`.
@@ -410,7 +410,7 @@ These are the supported query names:
  - `in`: the specified criteria contains the queried object
  - `contains`: the queried object contains the specified criteria
  - `regex`:  the queried object contains at least one match for the specified regular expression. This only works for strings and byte strings.
- - `is`: the queried object is identical to the specified criteria 
+ - `is`: the queried object is identical to the specified criteria
  - `is_not`: the queried object is not identical to the specified criteria
 
 ### Tests
