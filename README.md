@@ -13,14 +13,14 @@ are used to construct predicates that evaluate items
 or attributes within filtered objects.
 
 ### Use Case
-This package is best suited to nested, heterogenous data. Collections
+This package is best suited to nested, heterogeneous data. Collections
 of flat homogenous dictionaries or objects are easier to filter with
 list comprehensions or generator expressions.
 
 ### Examples
 
 #### Filtering by list/dictionary items
-In these example we'll be filtering a typtical response from `boto3`,
+In the next few examples, we'll be filtering a typical response from `boto3`,
 the python client for Amazon Web Services.
 
 ```python
@@ -135,8 +135,8 @@ set to `True`, we can do the following:
   'VersionNumber': 1}]
 ```
 
-The eqivelant generator expression for a simple query likes this
-is (in my admittedly biased oppinion) a little less readible.
+The equivalent generator expression for a simple query likes this
+is (in my admittedly biased opinion) a little less readable.
 
 ```python
 >>> results = (
@@ -168,7 +168,7 @@ def threads_gte(min_threads: int):
     return pred
 ```
 
-Here we're using `q_any`, which combines the predicates passsed into it,
+Here we're using `q_any`, which combines the predicates passed into it,
 returning `True` if at least one of them is satisfied.
 
 ```python
@@ -242,8 +242,8 @@ a hacky binary tree-like class is used to build a fictional ancestor chart.
                      father=Node('Wilbur Meadows')))
 ```
 
-To demonstate the syntax, we can filter for the root node by their
-great-great grandmother.
+To demonstrate the syntax, we can filter for the root node by their
+great-great-grandmother.
 
 ```python
 >>> results = q_filter(
@@ -254,8 +254,8 @@ great-great grandmother.
 [Node('Tiya Meadows', mother=Node('Isobel Meadows (nee Walsh)', mother=Node('Laura Walsh (nee Stanton)', mother=Node('Opal Eastwood (nee Plant)', mother=None, father=None), father=Node('Alan Eastwood', mother=None, father=None)), father=Node('Jimmy Walsh', mother=None, father=None)), father=Node('Isaac Meadows', mother=Node('Halle Meadows (nee Perkins)', mother=None, father=None), father=Node('Wilbur Meadows', mother=None, father=None)))]
 ```
 
-As attribures names can only be alphabetic characters and underscores,
-it make sense to separate them with dots.
+As attributes names can only be alphabetic characters and underscores,
+it makes sense to separate them with dots.
 
 
 #### Using Django-style keyword arguments
@@ -274,7 +274,7 @@ born with the surname Walsh that have a father node.
 
 ```
 
-NOTE: There is also a `k_items` function that can be used to filter dictinaries.
+NOTE: There is also a `k_items` function that can be used to filter dictionaries.
 It only works with string keys. You can include special characters and spaces
  by using `**`:
 ```python
@@ -289,17 +289,134 @@ as it doesn't cast the double-underscore-delimited strings to integers.
 
 #### Filter functions
 
-##### `query_filter.q_filter`
-This is an alias for `query_filter.q_filter_all`
+##### query_filter.q_filter
+This is an alias for `query_filter.q_filter_all`.
 
-#####
+##### query_filter.q_filter_all(objects: Iterable, *preds, copy=True) -> Iterable[Any]
+Returns objects for which all of the predicates in `preds` are true.
+
+##### query_filter.q_filter_any(objects: Iterable, *preds) -> Iterable[Any]
+Returns objects for which any of the predicates in `preds` are true.
+
+##### query_filter.q_filter_not_any(objects: Iterable, *preds) -> Iterable[Any]
+Returns objects for which none of the predicates in `preds` is true.
+
+##### query_filter.q_all(*preds: Callable) -> Callable
+Returns a predicate that returns `True` if all predicates 
+in `preds` return `True`.
+
+##### query_filter.q_any(*preds: Callable) -> Callable
+Returns a predicate that returns `True` if any predicates 
+in `preds` return `True`.
+
+##### query_filter.q_not(pred: Callable) -> Callable
+Returns a predicate that returns `True` if the predicate `pred` returns `False`.
 
 #### query functions
+##### query_filter.q_attr(path: str) -> Query
+Returns a `Query` object for evaluating attributes 
+indicated by the dot-delimited `path` argument.
+
+Query instances expose methods (magic and otherwise)
+for comparison etc. These methods return predicates.
+
+##### query_filter.q_item(\*keys: Hashable) -> Query
+Returns a `Query` object for evaluating items 
+indicated by one or more keys, passed as positional arguments.
+
+##### query_filter.k_attrs
+This is an alias of `query_filter.k_attrs_all`.
+
+##### query_filter.k_attrs_all(\*\*kwargs) -> Callable
+Returns a predicate that evaluates an object based on the
+
+#### Query methods
+The `Query` class behaves a bit like a Pandas Series, in that it supports comparisons using equality operators as well as method calls.
+It has the following methods for creating predicates.
+
+##### Query.lt(self, criteria: Any) -> Callable
+Returns a predicate that's true if the queried object is less than the criterion.
+
+##### Query.\_\_lt\_\_(self, criterion: Any) -> Callable
+Same as `Query.lt`. Call using the `<` operator.
+
+##### Query.lte(self, criterion: Any) -> Callable
+Returns a predicate that's true if the queried object is less than or equal to the criterion.
+
+##### Query.\_\_le\_\_(self, criterion: Any) -> Callable
+Same as `Query.lte`. Call using the`<=` operator.
+
+##### Query.eq(self, criterion: Any) -> Callable
+Returns a predicate that's true if the queried object is equal to the criterion.
+
+##### Query.\_\_eq\_\_(self, criterion: Any) -> Callable
+Same as `Query.eq`, Call using the `==` operator.
+
+##### Query.ne(self, criterion: Any) -> Callable
+Returns a predicate that's true if the queried object is not equal to the criterion.
+
+##### Query.\_\_ne\_\_(self, criterion: Any) -> Callable
+Same as `Query.ne`, Call using the `!=` operator.
+
+##### Query.gt(self, criterion: Any) -> Callable
+Returns a predicate that's true if the queried object is greater than the criterion.
+
+##### Query.\_\_gt\_\_(self, criterion: Any) -> Callable
+Same as `Query.gt`, Call using the `>` operator.
+
+##### Query.gte(self, criterion: Any) -> Callable
+Returns a predicate that's true if the queried object is greater than or equal to the criterion.
+
+##### Query.\_\_ge\_\_(self, criterion: Any) -> Callable
+Same as `Query.gte`, Call using the `>=` operator.
+
+##### Query.is_in(self, container: Any) -> Callable
+Returns a predicate that's true if the queried object is the `container` argument.
+
+##### Query.contains(self, member: Any) -> Callable
+Returns a predicate that's true if the queried object contains the `member` argument.
+
+##### Query.regex(self, pattern: str) -> Callable
+Returns a predicate that's true if the queried object matches the regular expression
+`pattern` argument. This only works for strings and byte strings.
+
+##### Query.is_none(self) -> Callable
+Returns a predicate that's true if the queried object is `None`.
+
+##### Query.is_not_none(self) -> Callable
+Returns a predicate that's true if the queried object is not `None`.
+
+##### Query.is_true(self) -> Callable
+Returns a predicate that's true if the queried object is `True`.
+
+##### Query.is_false(self) -> Callable
+Returns a predicate that's true if the queried object is `False`.
+
+#### "k_" function keyword arguemts
+Attribute names, keys and query names are separated by double-underscores. e.q `__`.
+
+The general form is simlar to the what's used in Django: 
+`(parent_attr__child_attr__query_name="Criteria for query")`.
+If the query name at the end is ommited, equality is assumed.
+`(parent_attr__child_attr=42)` is equivalent to `(parent_attr__child_attr__eq=42)`.
+
+These are the supported query names:
+ - `lt`: less than the specified criteria
+ - `lte`: less than or equal to the specified criteria
+ - `eq`: equal to the specified criteria
+ - `ne`: not equal to the specified criteria
+ - `gt`: greater than the specified criteria
+ - `gte`: greater than or equal to the specified criteria
+ - `in`: the specified criteria contains the queried object
+ - `contains`: the queried object contains the specified criteria
+ - `regex`:  the queried object contains at least one match for the specified regular expression. This only works for strings and byte strings.
+ - `is`: the queried object is identical to the specified criteria 
+ - `is_not`: the queried object is not identical to the specified criteria
 
 ### Tests
 
 If you want to run tests, you'll first need to install the package
-from source as editable. Ensuring that you're in the root direcory, of this repo,
+from source and make it editable. Ensuring that you're in the root directory, of this repo,
 enter:
 
 ```sh
@@ -313,3 +430,4 @@ To run tests with coverage:
 ```sh
 coverage run  --source "query_filter" -m pytest tests
 coverage report
+```
