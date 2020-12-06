@@ -431,3 +431,7 @@ To run tests with coverage:
 coverage run  --source "query_filter" -m pytest tests
 coverage report
 ```
+
+### Feature ideas
+- Query all items in an iterable rather than just one (when that's even possible).
+- Combine items and attributes. e.g. allow querying a dictionary attribute in some object.
