@@ -99,10 +99,10 @@ def query_predicate(predicate: Callable):
     """
     Decorates predicate functions.
 
-    The immediate output is a function that accepts an object is to be
+    The immediate output is a function that accepts an object that is to be
     evaluated and the means of getting this object from a "root" object.
-    This funtion returns a predicate that evaluates any "root" object
-    using the decorated function.
+    This function, in turn, returns a predicate that evaluates any "root"
+    object using the decorated function.
     """
     def pred_maker(get: Callable, keys: Iterable[Any]):
 
