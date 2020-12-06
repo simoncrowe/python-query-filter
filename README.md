@@ -289,7 +289,7 @@ as it doesn't cast the double-underscore-delimited strings to integers.
 
 #### Filter functions
 
-#####`query_filter.q_filter` 
+##### `query_filter.q_filter`
 This is an alias for `query_filter.q_filter_all`
 
 #####
