@@ -11,7 +11,6 @@ from query_filter.query import (
     k_items_all,
     k_items_any,
     k_items_not_any,
-    split_attr_key,
     split_key,
 )
 
@@ -121,32 +120,6 @@ def users(user_one, user_two, user_three, user_four, user_five):
 def get(obj, *keys):
     """Simple item getter for testing purposes."""
     return reduce(getitem, keys, obj)
-
-
-@pytest.mark.parametrize(
-    "key",
-    ["__", "___", "a__lick", "__lt", "a__", "a.b__", ".b", ".a__gt", "."]
-)
-def test_split_key_fails_if_not_formatted_correctly(key):
-    with pytest.raises(ValueError):
-        split_attr_key(key)
-
-
-@pytest.mark.parametrize(
-    "key,expected",
-    [
-        ("a", (["a"], "eq")),
-        ("a.b", (["a", "b"], "eq")),
-        ("a.b.c", (["a", "b", "c"], "eq")),
-        ("a.gte", (["a", "gte"], "eq")),
-        ("a__regex", (["a"], "regex")),
-        ("a.b__contains", (["a", "b"], "contains")),
-        ("a.b.c__is", (["a", "b", "c"], "is")),
-    ]
-)
-def test_split_attr_key_produces_expected_results(key, expected):
-    result = split_attr_key(key)
-    assert result == expected
 
 
 @pytest.mark.parametrize(

@@ -63,7 +63,7 @@ def retrieve_attr(obj: Any, *names: str):
 
 
 def q_attr(path: str):
-    return Query(*path.split(), getter=retrieve_attr)
+    return Query(*path.split("."), getter=retrieve_attr)
 
 
 def retrieve_item(obj: Mapping, *keys: Hashable):
@@ -226,65 +226,35 @@ def split_key(key: str):
     return keys, operation_name
 
 
-def split_attr_key(key: str):
-    if "__" in key:
-        key, operation_name = key.split("__")
-    else:
-        operation_name = "eq"
-
-    if operation_name not in _query_map:
-        raise ValueError(
-            f"'{operation_name}' is not a valid opration. "
-            f"Options are {', '.join(_query_map.keys())}"
-        )
-
-    keys = key.split(".")
-
-    if not keys or not all(bool(key) for key in keys):
-        raise ValueError(
-            "No part of the key-path may be an empty string. e.g. "
-            "These are not allowed: '.bar__eq', 'foo.bar.', ''"
-        )
-
-    return keys, operation_name
-
-
-def _kwarg_preds_items(kwargs: Mapping) -> Iterator[Callable]:
+def _kwarg_preds(kwargs: Mapping, getter: Callable) -> Iterator[Callable]:
     for key, value in kwargs.items():
         key_path, operation_name = split_key(key)
         filter_pred = _query_map[operation_name]
-        yield filter_pred(retrieve_item, key_path, value)
-
-
-def _kwarg_preds_attrs(kwargs: Mapping) -> Iterator[Callable]:
-    for key, value in kwargs.items():
-        key_path, operation_name = split_attr_key(key)
-        filter_pred = _query_map[operation_name]
-        yield filter_pred(retrieve_attr, key_path, value)
+        yield filter_pred(getter, key_path, value)
 
 
 def k_attrs_all(**kwargs) -> Callable:
-    return q_all(*_kwarg_preds_attrs(kwargs))
+    return q_all(*_kwarg_preds(kwargs, retrieve_attr))
 
 
 def k_attrs_any(**kwargs) -> Callable:
-    return q_any(*_kwarg_preds_attrs(kwargs))
+    return q_any(*_kwarg_preds(kwargs, retrieve_attr))
 
 
 def k_attrs_not_any(**kwargs) -> Callable:
-    return q_not(q_any(*_kwarg_preds_attrs(kwargs)))
+    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_attr)))
 
 
 def k_items_all(**kwargs) -> Callable:
-    return q_all(*_kwarg_preds_items(kwargs))
+    return q_all(*_kwarg_preds(kwargs, retrieve_item))
 
 
 def k_items_any(**kwargs) -> Callable:
-    return q_any(*_kwarg_preds_items(kwargs))
+    return q_any(*_kwarg_preds(kwargs, retrieve_item))
 
 
 def k_items_not_any(**kwargs) -> Callable:
-    return q_not(q_any(*_kwarg_preds_items(kwargs)))
+    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_item)))
 
 
 k_attrs = k_attrs_all
