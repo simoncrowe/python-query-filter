@@ -1,7 +1,8 @@
 ## python-query-filter
 
 This package provides a functional API for filtering collections of
-heterogeneous, nested dictionaries or complex objects.
+heterogeneous, nested dictionaries or complex objects. It has 100% test
+coverage.
 
 At the core of this API are `q_filter` functions, which are like
 the built-in `filter` function, but take any number of predicate functions
@@ -17,6 +18,8 @@ of flat homogenous dictionaries or objects are easier to filter with
 list comprehensions or generator expressions.
 
 ### Examples
+
+#### Filtering by list/dictionary items
 In these example we'll be filtering a typtical response from `boto3`,
 the python client for Amazon Web Services.
 
@@ -100,7 +103,7 @@ the python client for Amazon Web Services.
   'HTTPStatusCode': 200,
   'RetryAttempts': 0}}
 ```
-#### Filtering by list/dictionary items
+
 If we want to get data that have `AssociatePublicIpAddress`
 set to `True`, we can do the following:
 
@@ -145,14 +148,14 @@ is (in my admittedly biased oppinion) a little less readible.
 One reason for this is that the item `"AssociatePublicIpAddress"` is sometimes
 missing. The predicate returned by `is_true` above will silently return `False`
 on missing keys, whereas with the generator expression we need to call `get`
-to avoid a `KeyError`. We're not even considering the case of an empty
-list for `"NetworkInterfaces"` here.
+to avoid a `KeyError`. This doesn't even take into account the possibility of
+an empty list for `"NetworkInterfaces"` here.
 
 #### Filtering using custom predicates
 
 We can combine custom queries with those created with the help
 of this package. The following predicate can be used to ensure
-that the launch template versions specify a sufficient number of 
+that the launch template versions specify a sufficient number of
 threads.
 
 ```python
@@ -214,8 +217,8 @@ returning `True` if at least one of them is satisfied.
 #### Filtering by object attributes
 
 This can be useful if you're working with objects that have a lot
-of "has-a" relationships. For brevity, a hacky binary tree-like class
-is used to build a fictional ancestor chart.
+of "has-a" relationships to other objects. For brevity,
+a hacky binary tree-like class is used to build a fictional ancestor chart.
 
 ```python
 >>> class Node:
@@ -228,14 +231,14 @@ is used to build a fictional ancestor chart.
     def __repr__(self):
         return (f"Node('{self.name}', mother={repr(self.mother)}, "
                 f"father={repr(self.father)})")
->>> Node(name='Tiya Meadows', 
-         mother=Node('Isobel Meadows (nee Walsh)', 
-                     mother=Node(name='Laura Walsh (nee Stanton)', 
+>>> Node(name='Tiya Meadows',
+         mother=Node('Isobel Meadows (nee Walsh)',
+                     mother=Node(name='Laura Walsh (nee Stanton)',
                                  mother=Node('Opal Eastwood (nee Plant)'),
-                                 father=Node('Alan Eastwood')), 
-                     father=Node(name='Jimmy Walsh')), 
-         father=Node(name='Isaac Meadows', 
-                     mother=Node('Halle Meadows (nee Perkins)'), 
+                                 father=Node('Alan Eastwood')),
+                     father=Node(name='Jimmy Walsh')),
+         father=Node(name='Isaac Meadows',
+                     mother=Node('Halle Meadows (nee Perkins)'),
                      father=Node('Wilbur Meadows')))
 ```
 
@@ -251,8 +254,8 @@ great-great grandmother.
 [Node('Tiya Meadows', mother=Node('Isobel Meadows (nee Walsh)', mother=Node('Laura Walsh (nee Stanton)', mother=Node('Opal Eastwood (nee Plant)', mother=None, father=None), father=Node('Alan Eastwood', mother=None, father=None)), father=Node('Jimmy Walsh', mother=None, father=None)), father=Node('Isaac Meadows', mother=Node('Halle Meadows (nee Perkins)', mother=None, father=None), father=Node('Wilbur Meadows', mother=None, father=None)))]
 ```
 
-As attribures names can only be alphabetic characters, it's cleaner
-to deprate them with dots. 
+As attribures names can only be alphabetic characters and underscores,
+it make sense to separate them with dots.
 
 
 #### Using Django-style keyword arguments
@@ -278,22 +281,35 @@ It only works with string keys. You can include special characters and spaces
 k_items(**{"Cr4zy K3y!__ne": "sane"})
 ```
 
-This restriction to strings is quite a limitation, considering that a dictionary 
-key can be any hashable object. `k_items` also cannot filter lists or similar objects 
+This restriction to strings is quite a limitation, considering that a dictionary
+key can be any hashable object. `k_items` also cannot filter lists or similar objects
 as it doesn't cast the double-underscore-delimited strings to integers.
 
 ### API
 
 #### Filter functions
 
+#####`query_filter.q_filter` 
+This is an alias for `query_filter.q_filter_all`
+
+#####
+
 #### query functions
 
-### 100% test coverage
+### Tests
 
-To run tests and verify this:
+If you want to run tests, you'll first need to install the package
+from source as editable. Ensuring that you're in the root direcory, of this repo,
+enter:
 
 ```sh
+pip install -e .
 pip install -r requirements/development.txt
+pytest
+```
+
+To run tests with coverage:
+
+```sh
 coverage run  --source "query_filter" -m pytest tests
 coverage report
-```
