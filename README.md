@@ -14,7 +14,7 @@ or attributes within filtered objects.
 
 ### Use Case
 This package is best suited to nested, heterogeneous data. Collections
-of flat homogenous dictionaries or objects are easier to filter with
+of flat, homogeneous dictionaries or objects are easier to filter with
 list comprehensions or generator expressions.
 
 ### Examples
@@ -110,7 +110,7 @@ set to `True`, we can do the following:
 ```python
 >>> from query_filter import q_filter, q_item
 >>> results = q_filter(
-        data["LaunchTemplateVersions"],
+        versions_data["LaunchTemplateVersions"],
         q_item(
             "LaunchTemplateData", "NetworkInterfaces", 0, "AssociatePublicIpAddress"
         ).is_true()
@@ -140,7 +140,7 @@ is (in my admittedly biased opinion) a little less readable.
 
 ```python
 >>> results = (
-        version for version in data["LaunchTemplateVersions"]
+        version for version in versions_data["LaunchTemplateVersions"]
         if version["LaunchTemplateData"]["NetworkInterfaces"][0].get("AssociatePublicIpAddress") is True
     )
 ```
@@ -174,7 +174,7 @@ returning `True` if at least one of them is satisfied.
 ```python
 >>> from query_filter import q_any, q_filter, q_item
 >>> results = q_filter(
-        data["LaunchTemplateVersions"],
+        versions_data["LaunchTemplateVersions"],
         q_any(
             threads_gte(5),
             q_item("CreditSpecification", "CpuCredits") == "unlimited"
@@ -254,9 +254,14 @@ great-great-grandmother.
 [Node('Tiya Meadows', mother=Node('Isobel Meadows (nee Walsh)', mother=Node('Laura Walsh (nee Stanton)', mother=Node('Opal Eastwood (nee Plant)', mother=None, father=None), father=Node('Alan Eastwood', mother=None, father=None)), father=Node('Jimmy Walsh', mother=None, father=None)), father=Node('Isaac Meadows', mother=Node('Halle Meadows (nee Perkins)', mother=None, father=None), father=Node('Wilbur Meadows', mother=None, father=None)))]
 ```
 
-As attributes names can only be alphabetic characters and underscores,
+As attribute names can only be alphabetic characters and underscores*,
 it makes sense to separate them with dots.
 
+*It is technically possible to use other characters
+when calling `setattr` or mutating an object's `__dict__` attribute.
+However, names containing these characters don't work
+with python's normal syntax for attribute access
+so they aren't taken into consideration.
 
 #### Using Django-style keyword arguments
 
