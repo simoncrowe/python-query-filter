@@ -32,9 +32,9 @@ def q_all(*preds: Callable) -> Callable:
 
 
 def q_any(*preds: Callable) -> Callable:
-    def all_pred(obj: Any):
+    def any_pred(obj: Any):
         return any(pred(obj) for pred in preds)
-    return all_pred
+    return any_pred
 
 
 def q_not(pred: Callable) -> Callable:
