@@ -253,29 +253,29 @@ def _kwarg_preds(kwargs: Mapping, getter: Callable) -> Iterator[Callable]:
         yield filter_pred(getter, key_path, value)
 
 
-def k_attrs_all(**kwargs) -> Callable:
+def q_attrs_all(**kwargs) -> Callable:
     return q_all(*_kwarg_preds(kwargs, retrieve_attr))
 
 
-def k_attrs_any(**kwargs) -> Callable:
+def q_attrs_any(**kwargs) -> Callable:
     return q_any(*_kwarg_preds(kwargs, retrieve_attr))
 
 
-def k_attrs_not_any(**kwargs) -> Callable:
+def q_attrs_not_any(**kwargs) -> Callable:
     return q_not(q_any(*_kwarg_preds(kwargs, retrieve_attr)))
 
 
-def k_items_all(**kwargs) -> Callable:
+def q_items_all(**kwargs) -> Callable:
     return q_all(*_kwarg_preds(kwargs, retrieve_item))
 
 
-def k_items_any(**kwargs) -> Callable:
+def q_items_any(**kwargs) -> Callable:
     return q_any(*_kwarg_preds(kwargs, retrieve_item))
 
 
-def k_items_not_any(**kwargs) -> Callable:
+def q_items_not_any(**kwargs) -> Callable:
     return q_not(q_any(*_kwarg_preds(kwargs, retrieve_item)))
 
 
-k_attrs = k_attrs_all
-k_items = k_items_all
+q_attrs = q_attrs_all
+q_items = q_items_all

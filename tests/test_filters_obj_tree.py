@@ -1,6 +1,6 @@
 import pytest
 
-from query_filter import q_filter, q_attr, k_attrs
+from query_filter import q_filter, q_attr, q_attrs
 
 
 class Node:
@@ -102,7 +102,7 @@ def test_filter_root_by_ancestor_kwargs(all_nodes, root):
 
     results = q_filter(
         all_nodes,
-        k_attrs(mother__mother__name="Laura Walsh (nee Stanton)")
+        q_attrs(mother__mother__name="Laura Walsh (nee Stanton)")
     )
 
     assert list(results) == expected
@@ -112,7 +112,7 @@ def test_born_walsh_with_father_node(all_nodes, mother):
     expected = [mother]
 
     results = q_filter(all_nodes,
-                       k_attrs(name__regex=r"Walsh(?! \(nee)",
+                       q_attrs(name__regex=r"Walsh(?! \(nee)",
                                father__is_not=None))
 
     assert list(results) == expected

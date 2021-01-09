@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 from query_filter import (
-    k_items,
+    q_items,
     q_all,
     q_any,
     q_filter,
@@ -356,7 +356,7 @@ def test_filter_k_attr(all_versions, version_five):
     expected = [version_five]
 
     results = q_filter(all_versions["LaunchTemplateVersions"],
-                       k_items(VersionNumber__gt=3,
+                       q_items(VersionNumber__gt=3,
                                CreditSpecification__CpuCredits="standard"))
 
     assert list(results) == expected

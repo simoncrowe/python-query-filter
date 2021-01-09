@@ -272,28 +272,28 @@ so they aren't taken into consideration.
 #### Using Django-style keyword arguments
 
 If you want to filter based on multiple attributes, you can pass the paths
-as keyword arguments to the `k_attrs` function. This query looks for nodes
+as keyword arguments to the `q_attrs` function. This query looks for nodes
 born with the surname Walsh that have a father node.
 
 ```python
->>> from query_filter import k_attrs, q_filter
+>>> from query_filter import q_attrs, q_filter
 >>> results = q_filter(Node.instances,
-                       k_attrs(name__regex=r"Walsh(?! \(nee)",
+                       q_attrs(name__regex=r"Walsh(?! \(nee)",
                                father__is_not=None))
 >>> list(results)
 [Node('Isobel Meadows (nee Walsh)', mother=Node('Laura Walsh (nee Stanton)', mother=Node('Opal Eastwood (nee Plant)', mother=None, father=None), father=Node('Alan Eastwood', mother=None, father=None)), father=Node('Jimmy Walsh', mother=None, father=None))]
 
 ```
 
-NOTE: There is also a `k_items` function that can be used to filter dictionaries.
+NOTE: There is also a `q_items` function that can be used to filter dictionaries.
 It only works with string keys. You can include special characters and spaces
  by using `**`:
 ```python
-k_items(**{"Cr4zy K3y!__ne": "sane"})
+q_items(**{"Cr4zy K3y!__ne": "sane"})
 ```
 
 This restriction to strings is quite a limitation, considering that a dictionary
-key can be any hashable object. `k_items` also cannot filter lists or similar objects
+key can be any hashable object. `q_items` also cannot filter lists or similar objects
 as it doesn't cast the double-underscore-delimited strings to integers.
 
 ### API
