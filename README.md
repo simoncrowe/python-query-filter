@@ -142,8 +142,8 @@ is less readable.
 >>> from typing import Collection
 >>> results = (
         version for version in versions_data["LaunchTemplateVersions"]
-	if version["LaunchTemplateData"].get("NetworkInterfaces") and
-	isinstance(version["LaunchTemplateData"]["NetworkInterfaces"], Collection) and
+        if version["LaunchTemplateData"].get("NetworkInterfaces") and
+        isinstance(version["LaunchTemplateData"]["NetworkInterfaces"], Collection) and
         version["LaunchTemplateData"]["NetworkInterfaces"][0].get("AssociatePublicIpAddress") is True
     )
 ```
