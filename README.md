@@ -136,20 +136,26 @@ set to `True`, we can do the following:
 ```
 
 The equivalent generator expression for a simple query likes this
-is (in my admittedly biased opinion) a little less readable.
+is less readable.
 
 ```python
+>>> from typing import Collection
 >>> results = (
         version for version in versions_data["LaunchTemplateVersions"]
-        if version["LaunchTemplateData"]["NetworkInterfaces"][0].get("AssociatePublicIpAddress") is True
+	if version["LaunchTemplateData"].get("NetworkInterfaces") and
+	isinstance(version["LaunchTemplateData"]["NetworkInterfaces"], Collection) and
+        version["LaunchTemplateData"]["NetworkInterfaces"][0].get("AssociatePublicIpAddress") is True
     )
 ```
 
-One reason for this is that the item `"AssociatePublicIpAddress"` is sometimes
-missing. The predicate returned by `is_true` above will silently return `False`
-on missing keys, whereas with the generator expression we need to call `get`
-to avoid a `KeyError`. This doesn't even take into account the possibility of
-an empty list for `"NetworkInterfaces"` here.
+This example is excessive, but hopefully it explains the motivation
+behind this tool.
+A `get` call is needed in the generator expression above because the item
+`"AssociatePublicIpAddress"` is sometimes missing.
+The first two conditions aren't strictly needed to filter the example data.
+However, they do illustrate the fact that `q_item` predicates silently
+return false if "NetworkInterfaces" is not present, is not a collection
+or is an empty collection.
 
 #### Filtering using custom predicates
 
