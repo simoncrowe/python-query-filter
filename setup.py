@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="query-filters",
+    name="query-filter",
     version="0.1.0",
     author="Simon Crowe",
     author_email="simon.r.crowe@pm.me",
