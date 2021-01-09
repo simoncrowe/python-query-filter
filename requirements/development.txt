@@ -1,0 +1,3 @@
+coverage
+bumpversion
+pytest
