@@ -17,6 +17,11 @@ This package is best suited to nested, heterogeneous data. Collections
 of flat, homogeneous dictionaries or objects are easier to filter with
 list comprehensions or generator expressions.
 
+### Install
+```sh
+pip install query-filter
+```
+
 ### Examples
 
 #### Filtering by list/dictionary items
