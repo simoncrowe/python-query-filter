@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="query-filters",
-    version="0.0.0",
+    version="0.1.0",
     author="Simon Crowe",
     author_email="simon.r.crowe@pm.me",
     description="Python's filter function with composable queries.",
