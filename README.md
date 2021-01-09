@@ -331,18 +331,50 @@ indicated by the dot-delimited `path` argument.
 Query instances expose methods (magic and otherwise)
 for comparison etc. These methods return predicates.
 
+##### query\_filter.q\_attrs
+This is an alias of `query_filter.q_attrs_all`.
+
+##### query\_filter.q\_attrs\_all(\*\*kwargs) -> Callable
+Returns a predicate that evaluates an object based on one or more filters.
+These filters are defined using keyword arguments in a similar way
+to Django's `filter` function.
+What attribute to filter is indicated in the first part of the key,
+as a double-underscore-delimited path. How to filter
+is indicated by the last part of the key. The value is the criterion
+against which to filter.
+
+See the **"q_*s" plural predicate keyword arguemts** section below
+for information on valid keyword arguments.
+
+##### query\_filter.q\_attrs\_any(\*\*kwargs) -> Callable
+Like `q_attrs_all` but returns `True` if _any_ query evaluates `True`.
+
+##### query\_filter.q\_attrs\_not\_any(\*\*kwargs) -> Callable
+Like `q_attrs_all` but returns `True` if _no_ queries evaluate `True`.
+
 ##### query\_filter.q\_item(\*keys: Hashable) -> Query
 Returns a `Query` object for evaluating items
 indicated by one or more keys, passed as positional arguments.
 
-##### query\_filter.k\_attrs
-This is an alias of `query_filter.k_attrs_all`.
+##### query\_filter.q\_items
+This is an alias of `query_filter.q_items_all`.
 
-##### query\_filter.k\_attrs\_all(\*\*kwargs) -> Callable
-Returns a predicate that evaluates an object based on the
+##### query\_filter.q\_items\_all(\*\*kwargs) -> Callable
+Like `q_attrs_all`, but for items, such as those in a dictionary.
+
+##### query\_filter.q\_items\_any(\*\*kwargs) -> Callable
+Like `q_items_all` but returns `True` if _any_ query evaluates `True`.
+
+##### query\_filter.q\_items\_not\_any(\*\*kwargs) -> Callable
+Like `q_items_all` but returns `True` if _no_ queries evaluate `True`.
+
+##### query\_filter.q\_items
+This is an alias of `query_filter.q_items_all`.
+
 
 #### Query methods
-The `Query` class behaves a bit like a Pandas Series, in that it supports comparisons using equality operators as well as method calls.
+The `Query` class behaves a bit like a Pandas Series, in that
+it supports comparisons using equality operators as well as method calls.
 It has the following methods for creating predicates.
 
 ##### Query.lt(self, criteria: Any) -> Callable
@@ -352,7 +384,8 @@ Returns a predicate that's true if the queried object is less than the criterion
 Same as `Query.lt`. Call using the `<` operator.
 
 ##### Query.lte(self, criterion: Any) -> Callable
-Returns a predicate that's true if the queried object is less than or equal to the criterion.
+Returns a predicate that's true
+if the queried object is less than or equal to the criterion.
 
 ##### Query.\_\_le\_\_(self, criterion: Any) -> Callable
 Same as `Query.lte`. Call using the`<=` operator.
@@ -403,7 +436,7 @@ Returns a predicate that's true if the queried object is `True`.
 ##### Query.is\_false(self) -> Callable
 Returns a predicate that's true if the queried object is `False`.
 
-#### "k_" function keyword arguemts
+#### "q_*s" plural predicate keyword arguemts
 Attribute names, keys and query names are separated by double-underscores. e.q `__`.
 
 The general form is simlar to the what's used in Django:
