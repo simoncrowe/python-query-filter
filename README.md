@@ -477,5 +477,5 @@ coverage report
 ```
 
 ### Feature ideas
-- Query all items in an iterable rather than just one (when that's even possible).
-- Combine items and attributes. e.g. allow querying a dictionary attribute in some object.
+- Query all items in an iterable rather than just one
+  (when that's even possible).
