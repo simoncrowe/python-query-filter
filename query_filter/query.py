@@ -97,10 +97,12 @@ def q_item(*keys: Hashable) -> Query:
 
 def query_predicate(predicate: Callable):
     """
-    Decorates predicate functions.
+    Decorates predicate functions, allowing them to be applied
+    to nested "child" attributes or items of objects.
 
-    The immediate output is a function that accepts an object that is to be
-    evaluated and the means of getting this object from a "root" object.
+    The immediate output is a function that accepts a sequence of
+    key or attribute names and a function that uses this sequence
+    to get the desired "child" object from a "root" object.
     This function, in turn, returns a predicate that evaluates any "root"
     object using the decorated function.
     """
@@ -120,10 +122,10 @@ def query_predicate(predicate: Callable):
 
 def query_criterion(comparer: Callable):
     """
-    Like query_predicate, but decorates functions that evaluate an object
-    against some criterion.
+    Like query_predicate, but decorates functions that evaluate
+    a "child" object against some criterion.
     """
-    def pred_maker(get: Callable, keys: Iterable[Any], *criterion: Any):
+    def pred_maker(get: Callable, keys: Iterable[Any], *criteria: Any):
 
         def pred(obj: Any):
             try:
@@ -131,7 +133,7 @@ def query_criterion(comparer: Callable):
             except ObjNotFound:
                 return False
 
-            return comparer(evaluated, *criterion)
+            return comparer(evaluated, *criteria)
 
         return pred
 
