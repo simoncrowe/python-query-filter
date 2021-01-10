@@ -147,8 +147,7 @@ is less readable.
 >>> from typing import Collection
 >>> results = (
         version for version in versions_data["LaunchTemplateVersions"]
-        if version.get("LaunchTemplateData") and
-        version["LaunchTemplateData"].get("NetworkInterfaces") and
+        if version.get("LaunchTemplateData", {}).get("NetworkInterfaces") and
         isinstance(version["LaunchTemplateData"]["NetworkInterfaces"], Collection) and
         version["LaunchTemplateData"]["NetworkInterfaces"][0].get("AssociatePublicIpAddress") is True
     )
@@ -158,7 +157,7 @@ This example is excessive, but hopefully it explains the motivation
 behind this tool.
 A `get` call is needed in the generator expression above because the item
 `"AssociatePublicIpAddress"` is sometimes missing.
-The first three conditions aren't strictly needed to filter the example data.
+The first two conditions aren't strictly needed to filter the example data.
 However, they do illustrate the fact that `q_item` predicates silently
 return false if `"LaunchTemplateData"` is not present, or 
 if `"NetworkInterfaces"` is missing, is not a collection
