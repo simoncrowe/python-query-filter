@@ -1,6 +1,6 @@
 ## python-query-filter
 
-This package provides a functional API for filtering collections of
+This package provides a funcion-based API for filtering collections of
 heterogeneous, nested dictionaries or complex objects. It has 100% test
 coverage.
 
@@ -11,6 +11,8 @@ rather than just one.
 The remainder of the functions in this package
 are used to construct predicates that evaluate items
 or attributes within filtered objects.
+
+Inspired by the more class-based [QueryableList](https://github.com/kata198/QueryableList).
 
 ### Use Case
 This package is best suited to nested, heterogeneous data. Collections
