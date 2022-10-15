@@ -1,72 +1,88 @@
+import dataclasses
+import enum
+import re
 from functools import reduce
 from operator import getitem
-import re
 from typing import Any, Callable, Hashable, Iterable, Iterator, Mapping
 
 from query_filter.filter import q_all, q_any, q_not
 
 
+class LookupType(enum.Enum):
+    ITEM = 1
+    ATTR = 2
+
+
+@dataclasses.dataclass(frozen=True)
+class Lookup:
+    lookup_type: LookupType
+    name: Hashable
+
+
 class Query:
-    def __init__(self, *keys, getter: Callable):
-        self._keys = keys
-        self._getter = getter
+    def __init__(self, lookups=()):
+        self._lookups = lookups
+
+    def __getitem__(self, key):
+        new_lookup = Lookup(lookup_type=LookupType.ITEM, name=key)
+        return Query(self._lookups + (new_lookup,))
 
     def lt(self, criterion: Any) -> Callable:
-        return lt(self._getter, self._keys, criterion)
+        return lt(self._lookups, criterion)
 
     def __lt__(self, criterion: Any) -> Callable:
         return self.lt(criterion)
 
     def lte(self, criterion: Any) -> Callable:
-        return lte(self._getter, self._keys, criterion)
+        return lte(self._lookups, criterion)
 
     def __le__(self, criterion: Any) -> Callable:
         return self.lte(criterion)
 
     def eq(self, criterion: Any) -> Callable:
-        return eq(self._getter, self._keys, criterion)
+        return eq(self._lookups, criterion)
 
     def __eq__(self, criterion: Any) -> Callable:
         return self.eq(criterion)
 
     def ne(self, criterion: Any) -> Callable:
-        return ne(self._getter, self._keys, criterion)
+        return ne(self._lookups, criterion)
 
     def __ne__(self, criterion: Any) -> Callable:
         return self.ne(criterion)
 
     def gt(self, criterion: Any) -> Callable:
-        return gt(self._getter, self._keys, criterion)
+        return gt(self._lookups, criterion)
 
     def __gt__(self, criterion: Any) -> Callable:
         return self.gt(criterion)
 
     def gte(self, criterion: Any) -> Callable:
-        return gte(self._getter, self._keys, criterion)
+        return gte(self._lookups, criterion)
 
     def __ge__(self, criterion: Any) -> Callable:
         return self.gte(criterion)
 
     def is_in(self, container: Any) -> Callable:
-        return is_in(self._getter, self._keys, container)
+        return is_in(self._lookups, container)
 
     def contains(self, member: Any) -> Callable:
-        return contains(self._getter, self._keys, member)
+        return contains(self._lookups, member)
 
     def regex(self, pattern: str) -> Callable:
-        return regex(self._getter, self._keys, pattern)
+        return regex(self._lookups, pattern)
 
     def is_none(self) -> Callable:
-        return is_none(self._getter, self._keys)
+        return is_none(self._lookups)
 
     def is_not_none(self) -> Callable:
-        return is_not_none(self._getter, self._keys)
+        return is_not_none(self._lookups)
 
     def is_true(self) -> Callable:
-        return is_true(self._getter, self._keys)
+        return is_true(self._lookups)
 
     def is_false(self) -> Callable:
-        return is_false(self._getter, self._keys)
+        return is_false(self._lookups)
 
 
 class ObjNotFound(Exception):
@@ -95,6 +111,23 @@ def q_item(*keys: Hashable) -> Query:
     return Query(*keys, getter=retrieve_item)
 
 
+def retrieve_value(obj: Any, *lookups: Lookup):
+    value = obj
+
+    try:
+        for lookup in lookups:
+            if lookup.lookup_type == LookupType.ATTR:
+                value = getattr(value, lookup.name)
+            elif lookup.lookup_type == LookupType.ITEM:
+                value = getitem(value, lookup.name)
+            else:
+                raise ValueError(f"{lookup.lookup_type} is not a valid lookup type")
+    except (IndexError, KeyError, TypeError, AttributeError):
+        raise ObjNotFound()
+
+    return value
+
+
 def query_predicate(predicate: Callable):
     """
     Decorates predicate functions, allowing them to be applied
@@ -106,11 +139,11 @@ def query_predicate(predicate: Callable):
     This function, in turn, returns a predicate that evaluates any "root"
     object using the decorated function.
     """
-    def pred_maker(get: Callable, keys: Iterable[Any]):
+    def pred_maker(lookups: Iterable[Lookup]):
 
         def pred(obj: Any):
             try:
-                evaluated = get(obj, *keys)
+                evaluated = retrieve_value(obj, *lookups)
             except ObjNotFound:
                 return False
             return predicate(evaluated)
@@ -125,11 +158,11 @@ def query_criterion(comparer: Callable):
     Like query_predicate, but decorates functions that evaluate
     a "child" object against some criterion.
     """
-    def pred_maker(get: Callable, keys: Iterable[Any], *criteria: Any):
+    def pred_maker(lookups: Iterable[Lookup], *criteria: Any):
 
         def pred(obj: Any):
             try:
-                evaluated = get(obj, *keys)
+                evaluated = retrieve_value(obj, *lookups)
             except ObjNotFound:
                 return False
 
