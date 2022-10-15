@@ -15,7 +15,7 @@ def q_filter_not_any(objects: Iterable, *preds) -> Iterable[Any]:
     return filter(main_predicate, objects)
 
 
-def q_filter_all(objects: Iterable, *preds, copy=True) -> Iterable[Any]:
+def q_filter_all(objects: Iterable, *preds) -> Iterable[Any]:
     def main_predicate(item):
         return all(pred(item) for pred in preds)
 

@@ -16,59 +16,59 @@ class LookupType(enum.Enum):
 @dataclasses.dataclass(frozen=True)
 class Lookup:
     lookup_type: LookupType
-    name: Hashable
+    key: Hashable
+
+
+QUERY_METHOD_NAMES = ("is_in", "contains", "matches_regex", "is_none", "is_not_none")
 
 
 class Query:
     def __init__(self, lookups=()):
         self._lookups = lookups
 
-    def __call__(self, *args, **kwargs):
-        raise NotImplementedError("Cannot call Query object. Maybe you misspelled a method name")
+    def __getattribute__(self, name):
+        if name == "_lookups":
+            return super().__getattribute__(name)
+
+        new_lookup = Lookup(lookup_type=LookupType.ATTR, key=name)
+        return Query(self._lookups + (new_lookup,))
 
     def __getitem__(self, key):
-        new_lookup = Lookup(lookup_type=LookupType.ITEM, name=key)
+        new_lookup = Lookup(lookup_type=LookupType.ITEM, key=key)
         return Query(self._lookups + (new_lookup,))
 
-    def __getattr__(self, name):
-        new_lookup = Lookup(lookup_type=LookupType.ATTR, name=name)
-        return Query(self._lookups + (new_lookup,))
-
-    def lt(self, criterion: Any) -> Callable:
-        return lt(self._lookups, criterion)
+    def __call__(self, *args, **kwargs):
+        """Allow a Query object to act as one of its methods if called."""
+        if self._lookups:
+            rightmost_lookup = self._lookups[-1]
+            if rightmost_lookup.key in QUERY_METHOD_NAMES:
+                # Mutate lookups to remove method name
+                self._lookups = self._lookups[:-1]
+                method = super().__getattribute__(rightmost_lookup.key)
+                return method(*args, **kwargs)
+            raise NotImplementedError(
+                f"Cannot call Query for attribute name '{rightmost_lookup.key}'. "
+                "Maybe you misspelled a method name."
+            )
+        raise NotImplementedError("Cannot call Query. Maybe you misspelled a method name")
 
     def __lt__(self, criterion: Any) -> Callable:
-        return self.lt(criterion)
-
-    def lte(self, criterion: Any) -> Callable:
-        return lte(self._lookups, criterion)
+        return lt(self._lookups, criterion)
 
     def __le__(self, criterion: Any) -> Callable:
-        return self.lte(criterion)
-
-    def eq(self, criterion: Any) -> Callable:
-        return eq(self._lookups, criterion)
+        return lte(self._lookups, criterion)
 
     def __eq__(self, criterion: Any) -> Callable:
-        return self.eq(criterion)
-
-    def ne(self, criterion: Any) -> Callable:
-        return ne(self._lookups, criterion)
+        return eq(self._lookups, criterion)
 
     def __ne__(self, criterion: Any) -> Callable:
-        return self.ne(criterion)
-
-    def gt(self, criterion: Any) -> Callable:
-        return gt(self._lookups, criterion)
+        return ne(self._lookups, criterion)
 
     def __gt__(self, criterion: Any) -> Callable:
-        return self.gt(criterion)
-
-    def gte(self, criterion: Any) -> Callable:
-        return gte(self._lookups, criterion)
+        return gt(self._lookups, criterion)
 
     def __ge__(self, criterion: Any) -> Callable:
-        return self.gte(criterion)
+        return gte(self._lookups, criterion)
 
     def is_in(self, container: Any) -> Callable:
         return is_in(self._lookups, container)
@@ -76,7 +76,7 @@ class Query:
     def contains(self, member: Any) -> Callable:
         return contains(self._lookups, member)
 
-    def regex(self, pattern: str) -> Callable:
+    def matches_regex(self, pattern: str) -> Callable:
         return regex(self._lookups, pattern)
 
     def is_none(self) -> Callable:
@@ -84,12 +84,6 @@ class Query:
 
     def is_not_none(self) -> Callable:
         return is_not_none(self._lookups)
-
-    def is_true(self) -> Callable:
-        return is_true(self._lookups)
-
-    def is_false(self) -> Callable:
-        return is_false(self._lookups)
 
 
 class ObjNotFound(Exception):
@@ -124,9 +118,9 @@ def retrieve_value(obj: Any, *lookups: Lookup):
     try:
         for lookup in lookups:
             if lookup.lookup_type == LookupType.ATTR:
-                value = getattr(value, lookup.name)
+                value = getattr(value, lookup.key)
             elif lookup.lookup_type == LookupType.ITEM:
-                value = getitem(value, lookup.name)
+                value = getitem(value, lookup.key)
             else:
                 raise ValueError(f"{lookup.lookup_type} is not a valid lookup type")
     except (IndexError, KeyError, TypeError, AttributeError):
@@ -243,16 +237,6 @@ def is_none(obj: Any):
 @query_predicate
 def is_not_none(obj: Any):
     return obj is not None
-
-
-@query_predicate
-def is_true(obj: Any):
-    return obj is True
-
-
-@query_predicate
-def is_false(obj: Any):
-    return obj is False
 
 
 _query_map = {
