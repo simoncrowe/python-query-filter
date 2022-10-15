@@ -23,8 +23,15 @@ class Query:
     def __init__(self, lookups=()):
         self._lookups = lookups
 
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError("Cannot call Query object. Maybe you misspelled a method name")
+
     def __getitem__(self, key):
         new_lookup = Lookup(lookup_type=LookupType.ITEM, name=key)
+        return Query(self._lookups + (new_lookup,))
+
+    def __getattr__(self, name):
+        new_lookup = Lookup(lookup_type=LookupType.ATTR, name=name)
         return Query(self._lookups + (new_lookup,))
 
     def lt(self, criterion: Any) -> Callable:

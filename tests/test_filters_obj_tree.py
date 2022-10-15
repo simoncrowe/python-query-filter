@@ -1,6 +1,6 @@
 import pytest
 
-from query_filter import q_filter, q_attr, q_attrs
+from query_filter import q, q_filter
 
 
 class Node:
@@ -65,7 +65,7 @@ def mother(m_grandmother, m_grandfather):
 
 @pytest.fixture
 def root(mother, father):
-    return Node(name="Tiya Meadows", mother=mother, father=father)
+    return Node(name="Sally Meadows", mother=mother, father=father)
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def test_filter_root_by_furthest_ancestor(all_nodes, root):
 
     results = q_filter(
         all_nodes,
-        q_attr("mother.mother.mother.name").contains("Opal Eastwood")
+        q.mother.mother.mother.name.contains("Opal Eastwood")
     )
 
     assert list(results) == expected
@@ -102,7 +102,7 @@ def test_filter_root_by_ancestor_kwargs(all_nodes, root):
 
     results = q_filter(
         all_nodes,
-        q_attrs(mother__mother__name="Laura Walsh (nee Stanton)")
+        q.mother.mother.name == "Laura Walsh (nee Stanton)"
     )
 
     assert list(results) == expected
@@ -112,7 +112,7 @@ def test_born_walsh_with_father_node(all_nodes, mother):
     expected = [mother]
 
     results = q_filter(all_nodes,
-                       q_attrs(name__regex=r"Walsh(?! \(nee)",
-                               father__is_not=None))
+                       q.name.regex(r"Walsh(?! \(nee)"),
+                       q.father.is_not_none())
 
     assert list(results) == expected
