@@ -1,5 +1,6 @@
 import dataclasses
 import enum
+import operator
 import re
 from collections.abc import Container
 from operator import getitem
@@ -39,7 +40,7 @@ class Query:
         return lt(self, criterion)
 
     def __le__(self, criterion: Any) -> Callable[[Any], bool]:
-        return lte(self, criterion)
+        return le(self, criterion)
 
     def __eq__(self, criterion: Any) -> Callable[[Any], bool]:
         return eq(self, criterion)
@@ -51,7 +52,7 @@ class Query:
         return gt(self, criterion)
 
     def __ge__(self, criterion: Any) -> Callable[[Any], bool]:
-        return gte(self, criterion)
+        return ge(self, criterion)
 
     def __invert__(self) -> Callable[[Any], bool]:
         return negate(self)
@@ -70,11 +71,11 @@ def q_matches_regex(query: Query, pattern: str) -> Callable[[str | bytes], bool]
 
 
 def q_is(query: Query, criterion: Any) -> Callable[[Any], bool]:
-    return _is(query, criterion)
+    return is_(query, criterion)
 
 
 def q_is_not(query: Query, criterion: Any) -> Callable[[Any], bool]:
-    return _is_not(query, criterion)
+    return is_not(query, criterion)
 
 
 class ObjNotFound(Exception):
@@ -140,34 +141,15 @@ def query_criteria(comparer: Callable):
     return pred_maker
 
 
-@query_criteria
-def lt(evaluated: Any, criterion: Any):
-    return evaluated < criterion
-
-
-@query_criteria
-def lte(obj: Any, criterion: Any):
-    return obj <= criterion
-
-
-@query_criteria
-def eq(obj: Any, criterion: Any):
-    return obj == criterion
-
-
-@query_criteria
-def ne(obj: Any, criterion: Any) -> bool:
-    return obj != criterion
-
-
-@query_criteria
-def gt(obj: Any, criterion: Any) -> bool:
-    return obj > criterion
-
-
-@query_criteria
-def gte(obj: Any, criterion: Any) -> bool:
-    return obj >= criterion
+lt = query_criteria(operator.lt)
+le = query_criteria(operator.le)
+eq = query_criteria(operator.eq)
+ne = query_criteria(operator.ne)
+gt = query_criteria(operator.gt)
+ge = query_criteria(operator.ge)
+is_ = query_criteria(operator.is_)
+is_not = query_criteria(operator.is_not)
+contains = query_criteria(operator.contains)
 
 
 @query_criteria
@@ -175,26 +157,11 @@ def is_in(obj: Any, container: Any) -> bool:
     return obj in container
 
 
-@query_criteria
-def contains(obj: Any, member: Any) -> bool:
-    return member in obj
-
-
-@query_criteria
-def _is(obj: Any, criterion: Any) -> bool:
-    return obj is criterion
-
-
-@query_criteria
-def _is_not(obj: Any, criterion: Any) -> bool:
-    return obj is not criterion
+@query_predicate
+def negate(obj: Any):
+    return not obj
 
 
 @query_criteria
 def regex(obj: str | bytes, pattern: str | bytes):
     return bool(re.search(pattern, obj))
-
-
-@query_predicate
-def negate(obj: Any):
-    return not obj

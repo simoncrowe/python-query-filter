@@ -337,8 +337,8 @@ is truthy.
 `~q.is_active` will produce the opposite result.
 
 #####  Functions
-There are some useful Python operators such as `is` be overloaded.
-Functions exist to replace these.
+There are some useful operators such as `is` that cannot be overloaded.
+Most of the functions below replace these.
 
 ##### query\_filter.q\_is\_in(query: Query, container: Container) -> Callable[[Any], bool]
 Returns a predicate that's true if the queried object is the `container` argument.
@@ -346,11 +346,13 @@ Returns a predicate that's true if the queried object is the `container` argumen
 ##### query\_filter.q\_contains(query: Query, member: Any) -> Callable[[Container], bool]
 Returns a predicate that's true if the queried object contains the `member` argument.
 
-##### query\_filter.q\_is(query: Query) -> Callable[[Any], bool]
-Returns a predicate that's true if the queried object is `None`.
+##### query\_filter.q\_is(query: Query, criterion: Any) -> Callable[[Any], bool]
+Returns a predicate that's true if the queried object is identical
+to the criterion object.
 
-##### query\_filter.q\_is\_not(self) -> Callable[[Any], bool]
-Returns a predicate that's true if the queried object is not `None`.
+##### query\_filter.q\_is\_not(query, criterion: Any) -> Callable[[Any], bool]
+Returns a predicate that's true if the queried object is not identical
+to the criterion object.
 
 ##### query\_filter.q\_matches\_regex(query: Query, pattern: str | bytes) -> [[str | bytes], bool]
 This function may be convenient when working with strings and byte strings.
