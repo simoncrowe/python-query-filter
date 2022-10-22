@@ -1,6 +1,7 @@
 import dataclasses
 import enum
 import re
+from collections.abc import Container
 from operator import getitem
 from typing import Any, Callable, Hashable, Iterable, Iterator
 
@@ -34,54 +35,46 @@ class Query:
         new_lookup = Lookup(lookup_type=LookupType.ITEM, key=key)
         return Query(self._lookups + (new_lookup,))
 
-    def __lt__(self, criterion: Any) -> Callable:
+    def __lt__(self, criterion: Any) -> Callable[[Any], bool]:
         return lt(self, criterion)
 
-    def __le__(self, criterion: Any) -> Callable:
+    def __le__(self, criterion: Any) -> Callable[[Any], bool]:
         return lte(self, criterion)
 
-    def __eq__(self, criterion: Any) -> Callable:
+    def __eq__(self, criterion: Any) -> Callable[[Any], bool]:
         return eq(self, criterion)
 
-    def __ne__(self, criterion: Any) -> Callable:
+    def __ne__(self, criterion: Any) -> Callable[[Any], bool]:
         return ne(self, criterion)
 
-    def __gt__(self, criterion: Any) -> Callable:
+    def __gt__(self, criterion: Any) -> Callable[[Any], bool]:
         return gt(self, criterion)
 
-    def __ge__(self, criterion: Any) -> Callable:
+    def __ge__(self, criterion: Any) -> Callable[[Any], bool]:
         return gte(self, criterion)
 
-    def __invert__(self):
+    def __invert__(self) -> Callable[[Any], bool]:
         return negate(self)
 
 
-def q_is_in(query: Query, container: Any) -> Callable:
+def q_contains(query: Query, item: Any) -> Callable[[Container], bool]:
+    return contains(query, item)
+
+
+def q_is_in(query: Query, container: Container) -> Callable[[Any], bool]:
     return is_in(query, container)
 
 
-def q_contains(query: Query, member: Any) -> Callable:
-    return contains(query, member)
-
-
-def q_matches_regex(query: Query, pattern: str) -> Callable:
+def q_matches_regex(query: Query, pattern: str) -> Callable[[str | bytes], bool]:
     return regex(query, pattern)
 
 
-def q_is(query: Query, criterion: Any) -> Callable:
+def q_is(query: Query, criterion: Any) -> Callable[[Any], bool]:
     return _is(query, criterion)
 
 
-def q_is_not(query: Query, criterion: Any) -> Callable:
+def q_is_not(query: Query, criterion: Any) -> Callable[[Any], bool]:
     return _is_not(query, criterion)
-
-
-def q_is_none(query: Query) -> Callable:
-    return is_none(query)
-
-
-def q_is_not_none(query: Query) -> Callable:
-    return is_not_none(query)
 
 
 class ObjNotFound(Exception):
@@ -163,53 +156,43 @@ def eq(obj: Any, criterion: Any):
 
 
 @query_criteria
-def ne(obj: Any, criterion: Any):
+def ne(obj: Any, criterion: Any) -> bool:
     return obj != criterion
 
 
 @query_criteria
-def gt(obj: Any, criterion: Any):
+def gt(obj: Any, criterion: Any) -> bool:
     return obj > criterion
 
 
 @query_criteria
-def gte(obj: Any, criterion: Any):
+def gte(obj: Any, criterion: Any) -> bool:
     return obj >= criterion
 
 
 @query_criteria
-def is_in(obj: Any, container: Any):
+def is_in(obj: Any, container: Any) -> bool:
     return obj in container
 
 
 @query_criteria
-def contains(obj: Any, member: Any):
+def contains(obj: Any, member: Any) -> bool:
     return member in obj
 
 
 @query_criteria
-def _is(obj: Any, criterion: Any):
+def _is(obj: Any, criterion: Any) -> bool:
     return obj is criterion
 
 
 @query_criteria
-def _is_not(obj: Any, criterion: Any):
+def _is_not(obj: Any, criterion: Any) -> bool:
     return obj is not criterion
 
 
 @query_criteria
-def regex(obj: str or bytes, pattern: str or bytes):
+def regex(obj: str | bytes, pattern: str | bytes):
     return bool(re.search(pattern, obj))
-
-
-@query_predicate
-def is_none(obj: Any):
-    return obj is None
-
-
-@query_predicate
-def is_not_none(obj: Any):
-    return obj is not None
 
 
 @query_predicate

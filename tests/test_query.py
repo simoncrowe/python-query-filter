@@ -180,28 +180,6 @@ def test_q_is_not():
     assert actual == expected
 
 
-def test_q_is_none():
-    datum_one = {"id": 0, "value": 42}
-    datum_two = {"id": 1, "value": None}
-    data = [datum_one, datum_two]
-    expected = [datum_two]
-
-    results = q_filter(data, query.q_is_none(q["value"]))
-
-    assert list(results) == expected
-
-
-def test_q_is_not_none():
-    datum_one = {"id": 0, "value": 42}
-    datum_two = {"id": 1, "value": None}
-    data = [datum_one, datum_two]
-    expected = [datum_one]
-
-    results = q_filter(data, query.q_is_not_none(q["value"]))
-
-    assert list(results) == expected
-
-
 def test_q_matches_regex():
     datum_one = {"id": 0, "value": "03/12/2020"}
     datum_two = {"id": 1, "value": "2020-12-03"}
@@ -216,7 +194,7 @@ def test_q_matches_regex():
 
 
 def test_nonexistent_key(addresses):
-    results = q_filter(addresses, query.is_none(q["guard_dog"]))
+    results = q_filter(addresses, query.q_is(["guard_dog"], None))
     assert list(results) == []
 
 

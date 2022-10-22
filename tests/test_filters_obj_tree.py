@@ -1,7 +1,6 @@
 import pytest
 
-from query_filter import (q, q_contains, q_filter, q_is_not_none,
-                          q_matches_regex)
+from query_filter import q, q_contains, q_filter, q_is_not, q_matches_regex
 
 
 class Node:
@@ -114,6 +113,6 @@ def test_born_walsh_with_father_node(all_nodes, mother):
 
     results = q_filter(all_nodes,
                        q_matches_regex(q.name, r"Walsh(?! \(nee)"),
-                       q_is_not_none(q.father))
+                       q_is_not(q.father, None))
 
     assert list(results) == expected
