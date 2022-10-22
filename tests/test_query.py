@@ -1,10 +1,10 @@
 import pytest
 
+from query_filter import query
 from query_filter.filter import q_filter
-from query_filter.query import Query
 
 # Using a Query instance to test the public API
-q = Query()
+q = query.Query()
 
 
 @pytest.fixture
@@ -115,38 +115,37 @@ def test_greater_than_or_equal(addresses, address_three,
     assert list(results) == expected
 
 
-def test_is_in_list(addresses, address_one, address_five):
+def test_q_is_in_with_list(addresses, address_one, address_five):
     expected = [address_one, address_five]
 
     results = q_filter(
-        addresses, q["state"].is_in(["Texas", "Massachusetts"])
+        addresses, query.q_is_in(q["state"], ["Texas", "Massachusetts"])
     )
 
     assert list(results) == expected
 
 
-def test_is_in_string(addresses, address_one, address_two):
+def test_q_is_in_with_string(addresses, address_one, address_two):
     expected = [address_one, address_two]
 
-    results = q_filter(addresses, q["post_code"].is_in("92415-241024-01152"))
+    results = q_filter(addresses, query.q_is_in(q["post_code"], "92415-241024-01152"))
 
     assert list(results) == expected
 
 
-def test_list_contains():
+def test_q_contains_with_list():
     primes = {"type": "prime", "numbers": [2, 3, 5, 7, 11]}
     odd = {"type": "odd", "numbers": [1, 3, 5, 7, 9]}
     even = {"type": "even", "numbers": [0, 2, 4, 6, 8]}
     sequences = [primes, odd, even]
-
     expected = [primes, even]
 
-    results = q_filter(sequences, q["numbers"].contains(2))
+    results = q_filter(sequences, query.q_contains(q["numbers"], 2))
 
     assert list(results) == expected
 
 
-def test_string_contains():
+def test_q_contains_with_string():
     torpid_dic = {"type": "adjective", "word": "torpid"}
     turbid_dic = {"type": "adjective", "word": "turbid"}
     turgid_dic = {"type": "adjective", "word": "turgid"}
@@ -154,65 +153,73 @@ def test_string_contains():
 
     expected = [turbid_dic, turgid_dic]
 
-    actual = list(q_filter(words, q["word"].contains("u")))
+    actual = list(q_filter(words, query.q_contains(q["word"], "u")))
 
     assert actual == expected
 
 
-def test_is_none():
+def test_q_is():
+    sentinel = object()
+    ordinary_object = object()
+    objects = [sentinel, ordinary_object]
+    expected = [sentinel]
+
+    actual = list(q_filter(objects, query.q_is(q, sentinel)))
+
+    assert actual == expected
+
+
+def test_q_is_not():
+    sentinel = object()
+    ordinary_object = object()
+    objects = [sentinel, ordinary_object]
+    expected = [ordinary_object]
+
+    actual = list(q_filter(objects, query.q_is_not(q, sentinel)))
+
+    assert actual == expected
+
+
+def test_q_is_none():
     datum_one = {"id": 0, "value": 42}
     datum_two = {"id": 1, "value": None}
     data = [datum_one, datum_two]
     expected = [datum_two]
 
-    results = q_filter(data, q["value"].is_none())
+    results = q_filter(data, query.q_is_none(q["value"]))
 
     assert list(results) == expected
 
 
-def test_is_not_none():
+def test_q_is_not_none():
     datum_one = {"id": 0, "value": 42}
     datum_two = {"id": 1, "value": None}
     data = [datum_one, datum_two]
     expected = [datum_one]
 
-    results = q_filter(data, q["value"].is_not_none())
+    results = q_filter(data, query.q_is_not_none(q["value"]))
 
     assert list(results) == expected
 
 
-def test_matches_regex():
+def test_q_matches_regex():
     datum_one = {"id": 0, "value": "03/12/2020"}
     datum_two = {"id": 1, "value": "2020-12-03"}
     data = [datum_one, datum_two]
     expected = [datum_two]
 
-    results = q_filter(data, q["value"].matches_regex(r"[0-9]{4}-[0-9]{2}-[0-9]{2}"))
+    results = q_filter(data,
+                       query.q_matches_regex(q["value"],
+                                             r"[0-9]{4}-[0-9]{2}-[0-9]{2}"))
 
     assert list(results) == expected
 
 
-def test_lookup_same_name_as_method():
-    class Nun:
-        def __init__(self, is_none):
-            self.is_none = is_none
-
-    mother_mary = Nun(is_none=True)
-    mother_anna = Nun(is_none=None)
-    mother_joan = Nun(is_none=False)
-    nuns = [mother_mary, mother_anna, mother_joan]
-    expected = [mother_anna]
-
-    results = q_filter(nuns, q.is_none.is_none())
-
-    assert list(results) == expected
-
-
-def test_query_unknown_method(addresses):
-    with pytest.raises(NotImplementedError):
+def test_query_not_callable(addresses):
+    with pytest.raises(TypeError):
         q_filter(addresses, q.is_for_sale())
 
 
-def test_query_unknown_method_with_lookup(addresses):
-    with pytest.raises(NotImplementedError):
+def test_query_not_callable_with_lookup(addresses):
+    with pytest.raises(TypeError):
         q_filter(addresses, q.state.is_republican())

@@ -3,9 +3,7 @@ import enum
 import re
 from functools import reduce
 from operator import getitem
-from typing import Any, Callable, Hashable, Iterable, Iterator, Mapping
-
-from query_filter.filter import q_all, q_any, q_not
+from typing import Any, Callable, Hashable, Iterable, Mapping
 
 
 class LookupType(enum.Enum):
@@ -19,71 +17,63 @@ class Lookup:
     key: Hashable
 
 
-QUERY_METHOD_NAMES = ("is_in", "contains", "matches_regex", "is_none", "is_not_none")
-
-
 class Query:
     def __init__(self, lookups=()):
-        self._lookups = lookups
+        self.lookups = lookups
 
-    def __getattribute__(self, name):
-        if name == "_lookups":
-            return super().__getattribute__(name)
-
+    def __getattr__(self, name):
         new_lookup = Lookup(lookup_type=LookupType.ATTR, key=name)
-        return Query(self._lookups + (new_lookup,))
+        return Query(self.lookups + (new_lookup,))
 
     def __getitem__(self, key):
         new_lookup = Lookup(lookup_type=LookupType.ITEM, key=key)
-        return Query(self._lookups + (new_lookup,))
-
-    def __call__(self, *args, **kwargs):
-        """Allow a Query object to act as one of its methods if called."""
-        if self._lookups:
-            rightmost_lookup = self._lookups[-1]
-            if rightmost_lookup.key in QUERY_METHOD_NAMES:
-                # Mutate lookups to remove method name
-                self._lookups = self._lookups[:-1]
-                method = super().__getattribute__(rightmost_lookup.key)
-                return method(*args, **kwargs)
-            raise NotImplementedError(
-                f"Cannot call Query for attribute name '{rightmost_lookup.key}'. "
-                "Maybe you misspelled a method name."
-            )
-        raise NotImplementedError("Cannot call Query. Maybe you misspelled a method name")
+        return Query(self.lookups + (new_lookup,))
 
     def __lt__(self, criterion: Any) -> Callable:
-        return lt(self._lookups, criterion)
+        return lt(self.lookups, criterion)
 
     def __le__(self, criterion: Any) -> Callable:
-        return lte(self._lookups, criterion)
+        return lte(self.lookups, criterion)
 
     def __eq__(self, criterion: Any) -> Callable:
-        return eq(self._lookups, criterion)
+        return eq(self.lookups, criterion)
 
     def __ne__(self, criterion: Any) -> Callable:
-        return ne(self._lookups, criterion)
+        return ne(self.lookups, criterion)
 
     def __gt__(self, criterion: Any) -> Callable:
-        return gt(self._lookups, criterion)
+        return gt(self.lookups, criterion)
 
     def __ge__(self, criterion: Any) -> Callable:
-        return gte(self._lookups, criterion)
+        return gte(self.lookups, criterion)
 
-    def is_in(self, container: Any) -> Callable:
-        return is_in(self._lookups, container)
 
-    def contains(self, member: Any) -> Callable:
-        return contains(self._lookups, member)
+def q_is_in(query: Query, container: Any) -> Callable:
+    return is_in(query.lookups, container)
 
-    def matches_regex(self, pattern: str) -> Callable:
-        return regex(self._lookups, pattern)
 
-    def is_none(self) -> Callable:
-        return is_none(self._lookups)
+def q_contains(query: Query, member: Any) -> Callable:
+    return contains(query.lookups, member)
 
-    def is_not_none(self) -> Callable:
-        return is_not_none(self._lookups)
+
+def q_matches_regex(query: Query, pattern: str) -> Callable:
+    return regex(query.lookups, pattern)
+
+
+def q_is(query: Query, criterion: Any) -> Callable:
+    return _is(query.lookups, criterion)
+
+
+def q_is_not(query: Query, criterion: Any) -> Callable:
+    return _is_not(query.lookups, criterion)
+
+
+def q_is_none(query: Query) -> Callable:
+    return is_none(query.lookups)
+
+
+def q_is_not_none(query: Query) -> Callable:
+    return is_not_none(query.lookups)
 
 
 class ObjNotFound(Exception):
@@ -154,10 +144,10 @@ def query_predicate(predicate: Callable):
     return pred_maker
 
 
-def query_criterion(comparer: Callable):
+def query_criteria(comparer: Callable):
     """
     Like query_predicate, but decorates functions that evaluate
-    a "child" object against some criterion.
+    a "child" object against some criteria.
     """
     def pred_maker(lookups: Iterable[Lookup], *criteria: Any):
 
@@ -174,57 +164,57 @@ def query_criterion(comparer: Callable):
     return pred_maker
 
 
-@query_criterion
+@query_criteria
 def lt(evaluated: Any, criterion: Any):
     return evaluated < criterion
 
 
-@query_criterion
+@query_criteria
 def lte(obj: Any, criterion: Any):
     return obj <= criterion
 
 
-@query_criterion
+@query_criteria
 def eq(obj: Any, criterion: Any):
     return obj == criterion
 
 
-@query_criterion
+@query_criteria
 def ne(obj: Any, criterion: Any):
     return obj != criterion
 
 
-@query_criterion
+@query_criteria
 def gt(obj: Any, criterion: Any):
     return obj > criterion
 
 
-@query_criterion
+@query_criteria
 def gte(obj: Any, criterion: Any):
     return obj >= criterion
 
 
-@query_criterion
+@query_criteria
 def is_in(obj: Any, container: Any):
     return obj in container
 
 
-@query_criterion
+@query_criteria
 def contains(obj: Any, member: Any):
     return member in obj
 
 
-@query_criterion
+@query_criteria
 def _is(obj: Any, criterion: Any):
     return obj is criterion
 
 
-@query_criterion
+@query_criteria
 def _is_not(obj: Any, criterion: Any):
     return obj is not criterion
 
 
-@query_criterion
+@query_criteria
 def regex(obj: str or bytes, pattern: str or bytes):
     return bool(re.search(pattern, obj))
 
@@ -237,69 +227,3 @@ def is_none(obj: Any):
 @query_predicate
 def is_not_none(obj: Any):
     return obj is not None
-
-
-_query_map = {
-    "lt": lt,
-    "lte": lte,
-    "eq": eq,
-    "ne": ne,
-    "gt": gt,
-    "gte": gte,
-    "in": is_in,
-    "contains": contains,
-    "regex": regex,
-    "is": _is,
-    "is_not": _is_not,
-}
-
-
-def split_key(key: str):
-    *keys, operation_name = key.split("__")
-
-    if operation_name not in _query_map:
-        keys.append(operation_name)
-        operation_name = "eq"
-
-    if not keys or not all(bool(key) for key in keys):
-        raise ValueError(
-            "No part of the key-path may be an empty string. e.g. "
-            "These are not allowed: '__bar__eq', 'foo__bar__', ''"
-        )
-
-    return keys, operation_name
-
-
-def _kwarg_preds(kwargs: Mapping, getter: Callable) -> Iterator[Callable]:
-    for key, value in kwargs.items():
-        key_path, operation_name = split_key(key)
-        filter_pred = _query_map[operation_name]
-        yield filter_pred(getter, key_path, value)
-
-
-def q_attrs_all(**kwargs) -> Callable:
-    return q_all(*_kwarg_preds(kwargs, retrieve_attr))
-
-
-def q_attrs_any(**kwargs) -> Callable:
-    return q_any(*_kwarg_preds(kwargs, retrieve_attr))
-
-
-def q_attrs_not_any(**kwargs) -> Callable:
-    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_attr)))
-
-
-def q_items_all(**kwargs) -> Callable:
-    return q_all(*_kwarg_preds(kwargs, retrieve_item))
-
-
-def q_items_any(**kwargs) -> Callable:
-    return q_any(*_kwarg_preds(kwargs, retrieve_item))
-
-
-def q_items_not_any(**kwargs) -> Callable:
-    return q_not(q_any(*_kwarg_preds(kwargs, retrieve_item)))
-
-
-q_attrs = q_attrs_all
-q_items = q_items_all
