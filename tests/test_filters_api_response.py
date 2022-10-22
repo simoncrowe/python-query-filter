@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from query_filter import q, q_all, q_any, q_filter, q_not
+from query_filter import q, q_all, q_any, q_contains, q_filter, q_not
 
 
 @pytest.fixture
@@ -210,7 +210,7 @@ def test_filter_kwarg(all_versions, version_one):
 
     results = q_filter(
         all_versions["LaunchTemplateVersions"],
-        q["LaunchTemplateData"]["NetworkInterfaces"][0]["AssociatePublicIpAddress"].is_true()
+        q["LaunchTemplateData"]["NetworkInterfaces"][0]["AssociatePublicIpAddress"]
     )
 
     assert list(results) == expected
@@ -223,8 +223,8 @@ def test_filter_non_default_by_group(all_versions, version_two,
 
     results = q_filter(
         all_versions["LaunchTemplateVersions"],
-        q["LaunchTemplateData"]["NetworkInterfaces"][0]["Groups"].contains("sg-7c227019"),
-        q["DefaultVersion"].is_false()
+        q_contains(q["LaunchTemplateData"]["NetworkInterfaces"][0]["Groups"], "sg-7c227019"),
+        ~q["DefaultVersion"]
     )
 
     assert list(results) == expected
@@ -235,9 +235,8 @@ def test_filter_ip_addresses(all_versions, version_five):
 
     results = q_filter(
         all_versions["LaunchTemplateVersions"],
-        q["LaunchTemplateData"]["NetworkInterfaces"][0]["Ipv6Addresses"].contains(
-            {"Ipv6Address": "eb7a:5a31:f899:dd8c:e566:3307:a45e:dcf6"}
-        ),
+        q_contains(q["LaunchTemplateData"]["NetworkInterfaces"][0]["Ipv6Addresses"],
+                   {"Ipv6Address": "eb7a:5a31:f899:dd8c:e566:3307:a45e:dcf6"}),
         q_not(
             q["LaunchTemplateData"]["NetworkInterfaces"][0]["PrivateIpAddress"]
             == "80.141.152.14"

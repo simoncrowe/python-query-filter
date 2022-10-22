@@ -1,9 +1,8 @@
 import dataclasses
 import enum
 import re
-from functools import reduce
 from operator import getitem
-from typing import Any, Callable, Hashable, Iterable, Mapping
+from typing import Any, Callable, Hashable, Iterable, Iterator
 
 
 class LookupType(enum.Enum):
@@ -19,92 +18,78 @@ class Lookup:
 
 class Query:
     def __init__(self, lookups=()):
-        self.lookups = lookups
+        self._lookups = lookups
 
-    def __getattr__(self, name):
+    def __iter__(self) -> Iterator[Lookup]:
+        yield from self._lookups
+
+    def __getattribute__(self, name):
+        if name == "_lookups":
+            return super().__getattribute__(name)
+
         new_lookup = Lookup(lookup_type=LookupType.ATTR, key=name)
-        return Query(self.lookups + (new_lookup,))
+        return Query(self._lookups + (new_lookup,))
 
     def __getitem__(self, key):
         new_lookup = Lookup(lookup_type=LookupType.ITEM, key=key)
-        return Query(self.lookups + (new_lookup,))
+        return Query(self._lookups + (new_lookup,))
 
     def __lt__(self, criterion: Any) -> Callable:
-        return lt(self.lookups, criterion)
+        return lt(self, criterion)
 
     def __le__(self, criterion: Any) -> Callable:
-        return lte(self.lookups, criterion)
+        return lte(self, criterion)
 
     def __eq__(self, criterion: Any) -> Callable:
-        return eq(self.lookups, criterion)
+        return eq(self, criterion)
 
     def __ne__(self, criterion: Any) -> Callable:
-        return ne(self.lookups, criterion)
+        return ne(self, criterion)
 
     def __gt__(self, criterion: Any) -> Callable:
-        return gt(self.lookups, criterion)
+        return gt(self, criterion)
 
     def __ge__(self, criterion: Any) -> Callable:
-        return gte(self.lookups, criterion)
+        return gte(self, criterion)
+
+    def __invert__(self):
+        return negate(self)
 
 
 def q_is_in(query: Query, container: Any) -> Callable:
-    return is_in(query.lookups, container)
+    return is_in(query, container)
 
 
 def q_contains(query: Query, member: Any) -> Callable:
-    return contains(query.lookups, member)
+    return contains(query, member)
 
 
 def q_matches_regex(query: Query, pattern: str) -> Callable:
-    return regex(query.lookups, pattern)
+    return regex(query, pattern)
 
 
 def q_is(query: Query, criterion: Any) -> Callable:
-    return _is(query.lookups, criterion)
+    return _is(query, criterion)
 
 
 def q_is_not(query: Query, criterion: Any) -> Callable:
-    return _is_not(query.lookups, criterion)
+    return _is_not(query, criterion)
 
 
 def q_is_none(query: Query) -> Callable:
-    return is_none(query.lookups)
+    return is_none(query)
 
 
 def q_is_not_none(query: Query) -> Callable:
-    return is_not_none(query.lookups)
+    return is_not_none(query)
 
 
 class ObjNotFound(Exception):
     """Raised when the requested attr or item is not found."""
 
 
-def retrieve_attr(obj: Any, *names: str):
-    try:
-        return reduce(getattr, names, obj)
-    except AttributeError:
-        raise ObjNotFound()
-
-
-def q_attr(path: str) -> Query:
-    return Query(*path.split("."), getter=retrieve_attr)
-
-
-def retrieve_item(obj: Mapping, *keys: Hashable):
-    try:
-        return reduce(getitem, keys, obj)
-    except (IndexError, KeyError, TypeError):
-        raise ObjNotFound()
-
-
-def q_item(*keys: Hashable) -> Query:
-    return Query(*keys, getter=retrieve_item)
-
-
 def retrieve_value(obj: Any, *lookups: Lookup):
     value = obj
-
     try:
         for lookup in lookups:
             if lookup.lookup_type == LookupType.ATTR:
@@ -122,11 +107,10 @@ def retrieve_value(obj: Any, *lookups: Lookup):
 def query_predicate(predicate: Callable):
     """
     Decorates predicate functions, allowing them to be applied
-    to nested "child" attributes or items of objects.
+    to nested "child"
 
     The immediate output is a function that accepts a sequence of
-    key or attribute names and a function that uses this sequence
-    to get the desired "child" object from a "root" object.
+    lookup data indicating the desired "child" object in a "root" object.
     This function, in turn, returns a predicate that evaluates any "root"
     object using the decorated function.
     """
@@ -156,7 +140,6 @@ def query_criteria(comparer: Callable):
                 evaluated = retrieve_value(obj, *lookups)
             except ObjNotFound:
                 return False
-
             return comparer(evaluated, *criteria)
 
         return pred
@@ -227,3 +210,8 @@ def is_none(obj: Any):
 @query_predicate
 def is_not_none(obj: Any):
     return obj is not None
+
+
+@query_predicate
+def negate(obj: Any):
+    return not obj

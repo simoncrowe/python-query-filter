@@ -1,6 +1,7 @@
 import pytest
 
-from query_filter import q, q_filter
+from query_filter import (q, q_contains, q_filter, q_is_not_none,
+                          q_matches_regex)
 
 
 class Node:
@@ -91,7 +92,7 @@ def test_filter_root_by_furthest_ancestor(all_nodes, root):
 
     results = q_filter(
         all_nodes,
-        q.mother.mother.mother.name.contains("Opal Eastwood")
+        q_contains(q.mother.mother.mother.name, "Opal Eastwood")
     )
 
     assert list(results) == expected
@@ -112,7 +113,7 @@ def test_born_walsh_with_father_node(all_nodes, mother):
     expected = [mother]
 
     results = q_filter(all_nodes,
-                       q.name.regex(r"Walsh(?! \(nee)"),
-                       q.father.is_not_none())
+                       q_matches_regex(q.name, r"Walsh(?! \(nee)"),
+                       q_is_not_none(q.father))
 
     assert list(results) == expected

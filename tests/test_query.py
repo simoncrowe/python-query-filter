@@ -215,6 +215,11 @@ def test_q_matches_regex():
     assert list(results) == expected
 
 
+def test_nonexistent_key(addresses):
+    results = q_filter(addresses, query.is_none(q["guard_dog"]))
+    assert list(results) == []
+
+
 def test_query_not_callable(addresses):
     with pytest.raises(TypeError):
         q_filter(addresses, q.is_for_sale())
@@ -223,3 +228,29 @@ def test_query_not_callable(addresses):
 def test_query_not_callable_with_lookup(addresses):
     with pytest.raises(TypeError):
         q_filter(addresses, q.state.is_republican())
+
+
+def test_retrieve_value_attr():
+    value = "bar"
+    baz_cls = type("Baz", () , {"foo": value})
+    attr_lookup = query.Lookup(lookup_type=query.LookupType.ATTR, key="foo")
+
+    result = query.retrieve_value(baz_cls, attr_lookup)
+
+    assert result == value
+
+
+def test_retrieve_value_item():
+    value = "bar"
+    data = {"foo": value}
+    item_lookup = query.Lookup(lookup_type=query.LookupType.ITEM, key="foo")
+
+    result = query.retrieve_value(data, item_lookup)
+
+    assert result == value
+
+
+def test_retrieve_value_invalid_lookup_type():
+    with pytest.raises(ValueError):
+        query.retrieve_value(object(),
+                             query.Lookup(lookup_type=3.14, key="irrelevant"))
