@@ -294,7 +294,7 @@ Here is another example:
 ##### query\_filter.q\_filter
 This is an alias for `query_filter.q_filter_all`.
 
-##### query\_filter.q\_filter\_all(objects: Iterable, *preds, copy=True) -> Iterable[Any]
+##### query\_filter.q\_filter\_all(objects: Iterable, *preds) -> Iterable[Any]
 Returns objects for which all of the predicates in `preds` are true.
 
 ##### query\_filter.q\_filter\_any(objects: Iterable, *preds) -> Iterable[Any]
