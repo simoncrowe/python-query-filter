@@ -381,3 +381,4 @@ coverage report
 ### Feature ideas
 - Query all items in an iterable rather than just one using `...`
 - Build queries out of `Query` objects using the `&` and `|` operators
+- Make silent failure when retrieving attributes and items optional
