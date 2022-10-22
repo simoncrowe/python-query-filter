@@ -341,7 +341,7 @@ There are some useful operators such as `is` that cannot be overloaded.
 Most of the functions below replace these.
 
 ##### query\_filter.q\_is\_in(query: Query, container: Container) -> Callable[[Any], bool]
-Returns a predicate that's true if the queried object is the `container` argument.
+Returns a predicate that's true if the queried object is in the `container` argument.
 
 ##### query\_filter.q\_contains(query: Query, member: Any) -> Callable[[Container], bool]
 Returns a predicate that's true if the queried object contains the `member` argument.
