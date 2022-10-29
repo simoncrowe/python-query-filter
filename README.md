@@ -331,7 +331,7 @@ It provides a way of specifying lookups on objects. For instance,
 this would could be used to filter for orders created in May:
 
 ```python
->>> results = q_filter(orders, q.metadata['date_created'].month == 4)
+>>> results = q_filter(orders, q.metadata['date_created'].month == 5)
 ```
 
 The class supports some operators which offer the most convenient API
