@@ -291,43 +291,58 @@ Here is another example:
 
 #### Filter functions
 
-##### query\_filter.q\_filter
+`query_filter.q_filter`
+
 This is an alias for `query_filter.q_filter_all`.
 
-##### query\_filter.q\_filter\_all(objects: Iterable, *preds) -> Iterable[Any]
-Returns objects for which all of the predicates in `preds` are true.
+`query_filter.q_filter_all(objects: Iterable, *preds) -> Iterable[Any]`
 
-##### query\_filter.q\_filter\_any(objects: Iterable, *preds) -> Iterable[Any]
-Returns objects for which any of the predicates in `preds` are true.
+Returns a `filter` iterator containing objects for which all of the predicates in `preds` are true.
 
-##### query\_filter.q\_filter\_not\_any(objects: Iterable, *preds) -> Iterable[Any]
-Returns objects for which none of the predicates in `preds` is true.
+`query_filter.q_filter_any(objects: Iterable, *preds) -> Iterable[Any]`
 
-##### query\_filter.q\_all(*preds: Callable) -> Callable
+Returns a `filter` iterator containing objects for which any of the predicates in `preds` are true.
+
+`query_filter.q_filter_not_any(objects: Iterable, *preds) -> Iterable[Any]`
+
+Returns a `filter` iterator containing objects for which none of the predicates in `preds` is true.
+
+#### Predicate functions
+
+`query_filter.q_all(*preds: Callable) -> Callable`
+
 Returns a predicate that returns `True` if all predicates
 in `preds` return `True`.
 
-##### query\_filter.q\_any(*preds: Callable) -> Callable
+`query_filter.q_any(*preds: Callable) -> Callable`
+
 Returns a predicate that returns `True` if any predicates
 in `preds` return `True`.
 
-##### query\_filter.q\_not(pred: Callable) -> Callable
+`query_filter.q_not(pred: Callable) -> Callable`
+
 Returns a predicate that returns `True` if the predicate `pred` returns `False`.
 
 #### Building Queries
 The `Query` class, an instance of which is always imported as `q`
 is used to specify attribute and item access.
 
-##### Operators
+It provides a way of specifying lookups on objects. For instance, 
+this would could be used to filter for orders created in May:
+
+```python
+>>> results = q_filter(orders, q.metadata['date_created'].month == 4)
+```
+
 The class supports some operators which offer the most convenient API
 for building queries.
 
-###### Comparison
+##### Comparison Operators
 
 The `Query` class supports all six comparison operators:
 `<`, `<=`, `==`, `!=`, `>` and `>=`.
 
-###### Bitwise
+##### Bitwise Operators
 The bitwise not operator `~` negates the truthiness of the `Query` object.
 
 For example `q.is_active` will produce a predicate that returns `True` if
@@ -340,21 +355,26 @@ is truthy.
 There are some useful operators such as `is` that cannot be overloaded.
 Most of the functions below replace these.
 
-##### query\_filter.q\_is\_in(query: Query, container: Container) -> Callable[[Any], bool]
+`query_filter.q_is_in(query: Query, container: Container) -> Callable[[Any], bool]`
+
 Returns a predicate that's true if the queried object is in the `container` argument.
 
-##### query\_filter.q\_contains(query: Query, member: Any) -> Callable[[Container], bool]
+`query_filter.q_contains(query: Query, member: Any) -> Callable[[Container], bool]`
+
 Returns a predicate that's true if the queried object contains the `member` argument.
 
-##### query\_filter.q\_is(query: Query, criterion: Any) -> Callable[[Any], bool]
+`query_filter.q_is(query: Query, criterion: Any) -> Callable[[Any], bool]`
+
 Returns a predicate that's true if the queried object is identical
 to the criterion object.
 
-##### query\_filter.q\_is\_not(query, criterion: Any) -> Callable[[Any], bool]
+`query_filter.q_is_not(query, criterion: Any) -> Callable[[Any], bool]`
+
 Returns a predicate that's true if the queried object is not identical
 to the criterion object.
 
-##### query\_filter.q\_matches\_regex(query: Query, pattern: str | bytes) -> [[str | bytes], bool]
+`query_filter.q_matches_regex(query: Query, pattern: str | bytes) -> [[str | bytes], bool]`
+
 This function may be convenient when working with strings and byte strings.
 It returns a predicate that's true if the queried object matches the regular expression
 `pattern` argument.
