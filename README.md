@@ -162,7 +162,7 @@ A  `get` call is needed in the generator expression above because the item
 `"AssociatePublicIpAddress"` is sometimes missing.
 The first two conditions aren't strictly needed to filter the example data.
 However, they do illustrate the fact that `q_item` predicates silently
-return false if `"LaunchTemplateData"` is not present, or
+return `False` if `"LaunchTemplateData"` is not present, or
 if `"NetworkInterfaces"` is missing, is not a collection
 or is an empty collection.
 
