@@ -98,35 +98,8 @@ def retrieve_value(obj: Any, *lookups: Lookup):
     return value
 
 
-def query_predicate(predicate: Callable):
-    """
-    Decorates predicate functions, allowing them to be applied
-    to nested "child"
+def query_predicate(func: Callable):
 
-    The immediate output is a function that accepts a sequence of
-    lookup data indicating the desired "child" object in a "root" object.
-    This function, in turn, returns a predicate that evaluates any "root"
-    object using the decorated function.
-    """
-    def pred_maker(lookups: Iterable[Lookup]):
-
-        def pred(obj: Any):
-            try:
-                evaluated = retrieve_value(obj, *lookups)
-            except ObjNotFound:
-                return False
-            return predicate(evaluated)
-
-        return pred
-
-    return pred_maker
-
-
-def query_criteria(comparer: Callable):
-    """
-    Like query_predicate, but decorates functions that evaluate
-    a "child" object against some criteria.
-    """
     def pred_maker(lookups: Iterable[Lookup], *criteria: Any):
 
         def pred(obj: Any):
@@ -134,25 +107,25 @@ def query_criteria(comparer: Callable):
                 evaluated = retrieve_value(obj, *lookups)
             except ObjNotFound:
                 return False
-            return comparer(evaluated, *criteria)
+            return func(evaluated, *criteria)
 
         return pred
 
     return pred_maker
 
 
-lt = query_criteria(operator.lt)
-le = query_criteria(operator.le)
-eq = query_criteria(operator.eq)
-ne = query_criteria(operator.ne)
-gt = query_criteria(operator.gt)
-ge = query_criteria(operator.ge)
-is_ = query_criteria(operator.is_)
-is_not = query_criteria(operator.is_not)
-contains = query_criteria(operator.contains)
+lt = query_predicate(operator.lt)
+le = query_predicate(operator.le)
+eq = query_predicate(operator.eq)
+ne = query_predicate(operator.ne)
+gt = query_predicate(operator.gt)
+ge = query_predicate(operator.ge)
+is_ = query_predicate(operator.is_)
+is_not = query_predicate(operator.is_not)
+contains = query_predicate(operator.contains)
 
 
-@query_criteria
+@query_predicate
 def is_in(obj: Any, container: Any) -> bool:
     return obj in container
 
@@ -162,6 +135,6 @@ def negate(obj: Any):
     return not obj
 
 
-@query_criteria
+@query_predicate
 def regex(obj: str | bytes, pattern: str | bytes):
     return bool(re.search(pattern, obj))
