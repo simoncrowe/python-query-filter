@@ -475,7 +475,7 @@ wheels = [
 
 [[package]]
 name = "query-filter"
-version = "0.1.3"
+version = "1.0.3"
 source = { editable = "." }
 
 [package.dev-dependencies]
