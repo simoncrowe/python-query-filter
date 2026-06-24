@@ -467,21 +467,18 @@ These are the supported query names:
 
 ### Tests
 
-If you want to run tests, you'll first need to install the package
-from source and make it editable. Ensuring that you're in the root directory, of this repo,
-enter:
+This project uses [uv](https://docs.astral.sh/uv/). From the root directory of
+this repo, run the tests with:
 
 ```sh
-pip install -e .
-pip install -r requirements/development.txt
-pytest
+uv run --group dev pytest
 ```
 
 To run tests with coverage:
 
 ```sh
-coverage run  --source "query_filter" -m pytest tests
-coverage report
+uv run --group dev coverage run --source "query_filter" -m pytest tests
+uv run --group dev coverage report
 ```
 
 ### Feature ideas

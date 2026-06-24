@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Run tests
+        run: uv run --python 3.14 --group dev pytest -q
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  pypi-publish:
+    needs: build
+    runs-on: ubuntu-latest
+    # Configure a Trusted Publisher for this repo on PyPI, scoped to the
+    # "pypi" environment: https://docs.pypi.org/trusted-publishers/
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  cloudsmith-publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    env:
+      CLOUDSMITH_REPO: "simoncrowedemo/python-query-filter"
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Install and authenticate Cloudsmith CLI
+        uses: cloudsmith-io/cloudsmith-cli-action@v2
+        with:
+          # Org/namespace that owns the OIDC-enabled service account.
+          oidc-namespace: "simoncrowedemo"
+          # Service account slug configured for OIDC in Cloudsmith (Settings ->
+          # Services). Set as a repo variable so it isn't hardcoded.
+          oidc-service-slug: ${{ vars.CLOUDSMITH_SERVICE_SLUG }}
+
+      - name: Push to Cloudsmith
+        run: |
+          cloudsmith push python "$CLOUDSMITH_REPO" dist/*.tar.gz
+          cloudsmith push python "$CLOUDSMITH_REPO" dist/*.whl
