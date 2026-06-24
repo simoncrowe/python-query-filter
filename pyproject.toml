@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "query-filter"
-version = "1.0.3"
+version = "1.0.4"
 description = "Python's filter function with composable queries."
 readme = "README.md"
 license = "MIT"
@@ -40,7 +40,7 @@ dev = [
 ]
 
 [tool.bumpversion]
-current_version = "1.0.3"
+current_version = "1.0.4"
 commit = true
 tag = true
 tag_name = "v{new_version}"
