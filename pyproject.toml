@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "query-filter"
+version = "1.0.3"
+description = "Python's filter function with composable queries."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Simon Crowe", email = "simon.r.crowe@pm.me" },
+]
+requires-python = ">=3.10"
+dependencies = []
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[project.urls]
+Homepage = "https://github.com/simoncrowe/python-query-filter"
+Repository = "https://github.com/simoncrowe/python-query-filter"
+
+[tool.hatch.build.targets.wheel]
+packages = ["query_filter"]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "coverage",
+    "bump-my-version",
+]
+
+[tool.bumpversion]
+current_version = "1.0.3"
+commit = true
+tag = true
+tag_name = "v{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
